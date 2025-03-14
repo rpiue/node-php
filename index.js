@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware para servir archivos estáticos (CSS, imágenes, etc.)
 app.use(express.static(path.join(__dirname, "public")));
 
-// Ruta para ejecutar PHP
+// Ruta principal que ejecuta PHP
 app.get("/", (req, res) => {
     exec("php public/index.php", (error, stdout, stderr) => {
         if (error) {
@@ -19,7 +19,7 @@ app.get("/", (req, res) => {
     });
 });
 
-// Iniciar servidor
+// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
