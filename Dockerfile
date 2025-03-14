@@ -5,14 +5,20 @@ FROM debian:latest
 RUN apt-get update && apt-get install -y \
     apache2 php libapache2-mod-php curl nodejs npm && \
     a2enmod rewrite && \
+    echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     service apache2 restart
 
-# Define el directorio de trabajo
+# Define el directorio de trabajo para Apache
 WORKDIR /var/www/html
 
-# Copia los archivos del proyecto
+# Copia los archivos PHP al directorio web de Apache
 COPY public/ /var/www/html/
-COPY index.js /var/www/html/
+
+# Define el directorio de trabajo para Node.js
+WORKDIR /app
+
+# Copia los archivos de Node.js
+COPY index.js package.json /app/
 
 # Instala dependencias de Node.js
 RUN npm install
@@ -21,4 +27,4 @@ RUN npm install
 EXPOSE 80 3000
 
 # Comando para iniciar Apache y Node.js
-CMD service apache2 start && node index.js
+CMD service apache2 start && node /app/index.js
