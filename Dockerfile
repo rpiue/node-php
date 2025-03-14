@@ -1,10 +1,8 @@
-# Usa una imagen con Node.js y PHP ya instalados
-FROM php:8.2-cli
+# Usa una imagen con PHP y Node.js ya preinstalados
+FROM caddy:2.7.6-builder AS caddy-builder
 
-# Instala Node.js y npm
-RUN apt-get update && apt-get install -y curl \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+# Instala PHP y Node.js
+RUN apt-get update && apt-get install -y php-cli curl nodejs npm
 
 # Crea y entra en el directorio de la app
 WORKDIR /app
