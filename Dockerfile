@@ -1,8 +1,9 @@
-# Usa una imagen con PHP y Node.js ya preinstalados
-FROM caddy:2.7.6-builder AS caddy-builder
+# Usa una imagen de Debian con PHP y Node.js
+FROM debian:latest
 
-# Instala PHP y Node.js
-RUN apt-get update && apt-get install -y php-cli curl nodejs npm
+# Instala PHP, Node.js y dependencias necesarias
+RUN apt-get update && apt-get install -y \
+    php-cli curl nodejs npm
 
 # Crea y entra en el directorio de la app
 WORKDIR /app
