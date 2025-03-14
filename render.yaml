@@ -1,0 +1,10 @@
+services:
+  - name: node-php
+    type: web
+    runtime: docker
+    repo: https://github.com/rpiue/node-php
+    branch: main
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PORT
+        value: 80
