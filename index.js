@@ -1,23 +1,20 @@
 const express = require("express");
-const { exec } = require("child_process");
-const path = require("path");
+const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware para servir archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
-// Ruta principal que ejecuta PHP
-app.get("/", (req, res) => {
-    exec("php public/index.php", (error, stdout, stderr) => {
-        if (error) {
-            res.status(500).send(`Error ejecutando PHP: ${stderr}`);
-        } else {
-            res.send(stdout);
-        }
-    });
-});
+// Proxy para redirigir solicitudes PHP a Apache
+app.use(
+    "/",
+    createProxyMiddleware({
+        target: "http://localhost", // Apache corre en el puerto 80
+        changeOrigin: true,
+    })
+);
 
 // Iniciar servidor
 app.listen(PORT, () => {
