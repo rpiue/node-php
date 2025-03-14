@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  backend-node:
+    build: ./backend-node
+    ports:
+      - "3000:3000"
+
+  frontend-php:
+    image: php:8.2-fpm  # Usamos PHP-FPM en lugar de Apache
+    volumes:
+      - ./frontend-php:/var/www/html
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"  # Solo se expone este puerto
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend-node
+      - frontend-php
