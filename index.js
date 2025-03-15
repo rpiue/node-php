@@ -1,15 +1,21 @@
 const express = require("express");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para servir archivos estáticos
+// Middleware para servir archivos estáticos desde la carpeta "public"
 app.use(express.static("public"));
 
-// Proxy para redirigir solicitudes PHP a Apache
+// Ruta específica para mostrar el dashboard
+app.get("/dashboard", (req, res) => {
+    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+});
+
+// Proxy SOLO para solicitudes PHP (evita que todas las solicitudes pasen por Apache)
 app.use(
-    "/",
+    "/**/*.php", // Solo redirige solicitudes PHP
     createProxyMiddleware({
         target: "http://localhost", // Apache corre en el puerto 80
         changeOrigin: true,

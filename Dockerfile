@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     apache2 php libapache2-mod-php curl nodejs npm && \
     a2enmod rewrite && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
-    service apache2 restart
+    rm -rf /var/lib/apt/lists/*
 
 # Define el directorio de trabajo para Apache
 WORKDIR /var/www/html
@@ -21,10 +21,10 @@ WORKDIR /app
 COPY index.js package.json /app/
 
 # Instala dependencias de Node.js
-RUN npm install
+RUN npm install --production
 
-# Expone el puerto 80 para Apache y el 3000 para Node.js
+# Expone los puertos 80 (Apache) y 3000 (Node.js)
 EXPOSE 80 3000
 
-# Comando para iniciar Apache y Node.js
-CMD service apache2 start && node /app/index.js
+# Iniciar Apache y Node.js correctamente
+CMD service apache2 start && node /app/index.js && tail -f /dev/null
