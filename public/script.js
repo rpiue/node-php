@@ -54,24 +54,26 @@ function validarFormulario(e, esRegistro = false) {
     valid = false;
   }
 
-  if (valid) {
-    const formData = new FormData(formulario);
-    formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
 
-    fetch(formulario.action, {
-      method: "POST",
-      body: formData,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.error) {
-          alert(data.error); // Mostrar el mensaje de error del servidor
-        } else {
-          //alert(data.message); // Mostrar mensaje de éxito
-          //window.location.href = "/dashboard"; // Redirigir si es necesario
-        }
-      })
-      .catch(error => console.error("Error:", error));
+  if (valid) {
+    this.submit();
+    //const formData = new FormData(formulario);
+    //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
+//
+    //fetch(formulario.action, {
+    //  method: "POST",
+    //  body: formData,
+    //})
+    //  .then(response => response.json())
+    //  .then(data => {
+    //    if (data.error) {
+    //      alert(data.error); // Mostrar el mensaje de error del servidor
+    //    } else {
+    //      //alert(data.message); // Mostrar mensaje de éxito
+    //      //window.location.href = "/dashboard"; // Redirigir si es necesario
+    //    }
+    //  })
+    //  .catch(error => console.error("Error:", error));
   }
 }
 

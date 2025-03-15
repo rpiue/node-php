@@ -10,12 +10,12 @@ app.use(express.static("public"));
 
 // Ruta específica para mostrar el dashboard
 app.get("/dashboard", (req, res) => {
-    res.sendFile(path.join(__dirname, "public", "dashboard.html"));
+    res.sendFile(path.join(__dirname, "public", "dashboard.php"));
 });
 
 // Proxy SOLO para solicitudes PHP (evita que todas las solicitudes pasen por Apache)
 app.use(
-    "/**/*.php", // Solo redirige solicitudes PHP
+    "/", // Solo redirige solicitudes PHP
     createProxyMiddleware({
         target: "http://localhost", // Apache corre en el puerto 80
         changeOrigin: true,
