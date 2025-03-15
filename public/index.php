@@ -7,6 +7,7 @@ if (isset($_SESSION['user'])) {
 
 $error = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
     $email = $_POST['email'];
     $telefono = $_POST['telefono'];
     $password = $_POST['password'];
@@ -251,6 +252,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div id="contenedorFrom" class="bg-gray-900 bg-opacity-90 shadow-drop-center blur-in p-8 rounded-2xl shadow-2xl w-96 text-center">
         <img src="./images/favicon.png" alt="Logo" class="w-24 mx-auto mb-4">
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
+        <?php if ($error): ?>
+            <p style="color: red;"><?php echo $error; ?></p>
+        <?php endif; ?>
         <form id="form" class="formulario" method="POST">
             <div class="mb-4 text-left">
                 <label class="block text-gray-300 text-sm mb-2">Correo Electrónico</label>
