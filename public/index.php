@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $telefono = $_POST['telefono'];
     $password = $_POST['password'];
 
-    if ($email === "usuario1" && $password === "1234") {
+    if ($email === "usuario@gmail.com" && $password === "1234") {
         $_SESSION['email'] = $email;
         header("Location: https://node-php.onrender.com/dashboard");
         exit();
