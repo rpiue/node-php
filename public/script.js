@@ -56,7 +56,7 @@ function validarFormulario(e, esRegistro = false) {
 
 
   if (valid) {
-    e.submit();
+    esRegistro.submit();
     //const formData = new FormData(formulario);
     //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
 //
