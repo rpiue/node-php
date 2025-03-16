@@ -18,7 +18,7 @@ const passwordError = document.querySelector("#passwordError");
 const telError = document.querySelector("#telError");
 
 // Función para validar
-function validarFormulario(e, esRegistro = false) {
+function validarFormulario(e, fromulario, esRegistro = false) {
   e.preventDefault();
   let valid = true;
 
@@ -56,7 +56,7 @@ function validarFormulario(e, esRegistro = false) {
 
 
   if (valid) {
-    esRegistro.submit();
+    fromulario.submit();
     //const formData = new FormData(formulario);
     //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
 //
@@ -80,7 +80,7 @@ function validarFormulario(e, esRegistro = false) {
 // Validación para login y registro
 formulario.addEventListener("submit", function (e) {
   const esRegistro = formulario.classList.contains("registro");
-  validarFormulario(e, esRegistro);
+  validarFormulario(e, formulario, esRegistro);
 });
 
 // Cambio a registro
