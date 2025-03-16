@@ -53,11 +53,10 @@ function validarFormulario(e, esRegistro = false) {
     telinput.classList.add("error");
     valid = false;
   }
-  this.submit();
 
 
   if (valid) {
-    this.submit();
+    e.submit();
     //const formData = new FormData(formulario);
     //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
 //
@@ -75,14 +74,14 @@ function validarFormulario(e, esRegistro = false) {
     //    }
     //  })
     //  .catch(error => console.error("Error:", error));
-  }
+  }//
 }
 
 // Validación para login y registro
-//formulario.addEventListener("submit", function (e) {
-//  const esRegistro = formulario.classList.contains("registro");
-//  //validarFormulario(e, esRegistro);
-//});
+formulario.addEventListener("submit", function (e) {
+  const esRegistro = formulario.classList.contains("registro");
+  validarFormulario(e, esRegistro);
+});
 
 // Cambio a registro
 btnDinamico.addEventListener("click", function (event) {
