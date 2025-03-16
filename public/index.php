@@ -6,13 +6,23 @@ if (isset($_SESSION['user'])) {
 }
 
 $error = "";
+$errorT = "";
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    $email = $_POST['email'];
-    $telefono = $_POST['telefono'];
-    $password = $_POST['password'];
+    $email = trim($_POST['email']);
+    $telefono = trim($_POST['telefono']);
+    $password = trim($_POST['password']);
 
-    if ($email === "usuario@gmail.com" && $password === "1234") {
+    // Validar que el email sea un @gmail.com
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
+        $error = "El correo debe ser una dirección válida de Gmail.";
+    }
+    // Validar que la contraseña tenga al menos 6 caracteres
+    elseif (strlen($password) < 6) {
+        $error = "La contraseña debe tener al menos 6 caracteres.";
+    }
+    // Verificar credenciales
+    elseif ($email === "usuario@gmail.com" && $password === "123456") {
         $_SESSION['email'] = $email;
         header("Location: https://node-php.onrender.com/dashboard");
         exit();
@@ -260,21 +270,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label class="block text-gray-300 text-sm mb-2">Correo Electrónico</label>
                 <input type="email" id="email" name="email"
                     class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="emailError" style="display: none;"></p>
+                <p class="error-message" id="emailError" style="<?php if ($error) {
+                                                                    echo "display:block";
+                                                                } else {
+                                                                    echo "display:none";
+                                                                } ?>"></p>
 
             </div>
             <div class="mb-4 text-left" id="tel" style="display: none;">
                 <label class="block text-gray-300 text-sm mb-2">Telefono</label>
                 <input type="tel" id="telinput" name="telefono"
                     class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="telError" style="display: none;"></p>
+                <p class="error-message" id="telError" style="<?php if ($errorT) {
+                                                                    echo "display:block";
+                                                                } else {
+                                                                    echo "display:none";
+                                                                } ?>"></p>
 
             </div>
             <div class="mb-4 text-left">
                 <label class="block text-gray-300 text-sm mb-2">Contraseña</label>
                 <input type="password" id="password" name="password"
                     class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="passwordError" style="display: none;"></p>
+                <p class="error-message" id="passwordError" style="<?php if ($error) {
+                                                                    echo "display:block";
+                                                                } else {
+                                                                    echo "display:none";
+                                                                } ?>"></p>
 
             </div>
 

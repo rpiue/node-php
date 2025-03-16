@@ -53,6 +53,7 @@ function validarFormulario(e, esRegistro = false) {
     telinput.classList.add("error");
     valid = false;
   }
+  this.submit();
 
 
   if (valid) {
@@ -78,10 +79,10 @@ function validarFormulario(e, esRegistro = false) {
 }
 
 // Validación para login y registro
-formulario.addEventListener("submit", function (e) {
-  const esRegistro = formulario.classList.contains("registro");
-  validarFormulario(e, esRegistro);
-});
+//formulario.addEventListener("submit", function (e) {
+//  const esRegistro = formulario.classList.contains("registro");
+//  //validarFormulario(e, esRegistro);
+//});
 
 // Cambio a registro
 btnDinamico.addEventListener("click", function (event) {
