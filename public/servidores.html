@@ -1,0 +1,168 @@
+<style>
+    @media (min-width: 1019px) {
+        .lm\:grid-cols-6 {
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+        }
+    }
+</style>
+<section class="p-4 bg-gray-900 text-white rounded-lg shadow-lg w-full">
+    <h2 class="text-2xl font-bold mb-4">Servidores</h2>
+
+    <!-- Buscador -->
+    <input type="text" id="buscador" placeholder="Buscar..."
+        class="w-full p-2 mb-4 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+    <!-- Categorías -->
+    <div class="inline-flex gap-2 mb-4 overflow-x-auto scrollbar-hide w-full">
+        <button class="px-3 py-1 bg-red-700 text-white rounded-md w-auto" data-categoria="todos">Todos</button>
+        <button class="px-3 py-1 bg-gray-800 text-white rounded-md w-auto" data-categoria="red-social">Redes
+            Sociales</button>
+        <button class="px-3 py-1 bg-gray-800 text-white rounded-md w-auto" data-categoria="streaming">Streaming</button>
+        <button class="px-3 py-1 bg-gray-800 text-white rounded-md w-auto" data-categoria="banco">Bancos</button>
+        <button class="px-3 py-1 bg-gray-800 text-white rounded-md w-auto" data-categoria="casino">Casinos</button>
+    </div>
+
+
+
+
+    <!-- Lista de Redes Sociales -->
+    <div id="servidores-lista" class="grid grid-cols-2 sm:grid-cols-4 lm:grid-cols-6 gap-4">
+        {{contenido}}
+    </div>
+
+    <div id="contenidoHTML"></div>
+</section>
+
+<script>
+    'variables'
+    const servidoresLista = document.getElementById("servidores-lista");
+    const botonesFiltro = document.querySelectorAll("button[data-categoria]");
+
+    const generarHTML = (items) => {
+        servidoresLista.innerHTML = items.map(servidor => `
+        <button onclick="solicitarMensaje('${servidor.nombre}')">
+            <div class="flex flex-col items-center justify-center p-4 bg-gray-800 rounded-lg">
+                <img src="${servidor.img}" alt="${servidor.nombre}" class="w-12 h-12">
+                <span class="mt-2">${servidor.nombre}</span>
+                <span class="text-${servidor.estado === "Online" ? "green" : "red"}-500 mt-1">${servidor.estado}</span>
+            </div>
+        </button>
+        
+        `).join("");
+    };
+
+    const buscador = document.getElementById("buscador");
+
+    botonesFiltro.forEach(boton => {
+        boton.addEventListener("click", () => {
+            // Remover el color azul de todos los botones
+            botonesFiltro.forEach(btn => btn.classList.replace("bg-red-700", "bg-gray-800"));
+
+            // Agregar el color azul al botón seleccionado
+            boton.classList.replace("bg-gray-800", "bg-red-700");
+
+            const categoria = boton.getAttribute("data-categoria");
+
+            if (categoria === "todos") {
+                generarHTML(servidores);
+            } else {
+                const filtrados = servidores.filter(s => s.categorias.includes(categoria));
+                generarHTML(filtrados);
+            }
+        });
+    });
+
+    buscador.addEventListener("input", (e) => {
+        const texto = e.target.value.toLowerCase();
+        const filtrados = servidores.filter(s => s.nombre.toLowerCase().includes(texto));
+        generarHTML(filtrados);
+    });
+</script>
+<script>
+    // Conexión al servidor de Socket.IO
+    const socket = io();
+
+    // Evento para recibir mensaje del servidor
+
+
+
+
+    // Función para solicitar el mensaje del servidor al hacer clic en el botón
+    //function solicitarMensaje() {
+    //    // Emitimos el evento 'solicitarMensaje' al servidor
+    //    alert("hola")
+    //    //socket.emit('solicitarMensaje');
+    //}
+
+    // Hacer la función global
+    window.solicitarMensaje = function (id) {
+        const nuevaURL = `${window.location.origin}${window.location.pathname}?tipo=servidores&plataforma=${id}`;
+        window.history.pushState({}, "", nuevaURL);
+        solicitarArchivo(id);
+
+
+    };
+
+
+    function solicitarArchivo(file) {
+        socket.emit("solicitarArchivo", { tipo: "servidores", id: file });
+    }
+
+    // Escuchar respuesta del servidor
+    socket.on("archivoCargado", (data) => {
+        document.getElementById("contenido").innerHTML = data.contenido;
+        setTimeout(() => {
+            ejecutarScripts(document.getElementById("contenido"))
+        }, 500);
+    });
+
+    function ejecutarScripts(elemento) {
+        document.querySelectorAll("script[data-dinamico]").forEach(script => script.remove());
+
+        const scripts = elemento.querySelectorAll("script");
+
+        scripts.forEach(oldScript => {
+            let newScript = document.createElement("script");
+            newScript.setAttribute("data-dinamico", "true"); // Marcar como dinámico
+
+            if (oldScript.src) {
+                newScript.src = oldScript.src + "?v=" + new Date().getTime();
+                newScript.async = true;
+                document.body.appendChild(newScript);
+            } else {
+                try {
+                    const scriptContent = oldScript.textContent;
+                    new Function(scriptContent)();
+                } catch (error) {
+                    console.error("Error ejecutando script embebido:", error);
+                }
+            }
+        });
+
+
+    }
+
+
+
+    socket.on("errorArchivo", (mensaje) => {
+        alert(mensaje);
+    });
+
+    // Verificar si hay un ID en la URL al cargar la página y solicitar el archivo correspondiente
+    window.addEventListener("load", () => {
+        const hash = window.location.hash;
+        if (hash.includes("&")) {
+            const id = hash.split("&")[1]; // Extrae el ID después de "#servidores&"
+            if (id) {
+                solicitarArchivo(id);
+            }
+        }
+    });
+
+
+    // Función para actualizar el contenido de las redes sociales cuando sea necesario
+    function actualizarContenido() {
+        // Emitimos el evento 'actualizarRedesSociales' al servidor
+        socket.emit('actualizarRedesSociales');
+    }
+</script>

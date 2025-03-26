@@ -24,7 +24,11 @@ RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.c
 WORKDIR /app
 
 # Copia los archivos de Node.js
-COPY index.js package.json /app/
+COPY index.js package.json  /app/
+
+COPY DB/ /app/DB
+
+
 
 # Instala dependencias de Node.js
 RUN npm install --production

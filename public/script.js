@@ -6,7 +6,9 @@ const contenedorFrom = document.querySelector("#contenedorFrom");
 const email = document.querySelector("#email");
 const password = document.querySelector("#password");
 const telContainer = document.querySelector("#tel");
+const nameContainer = document.querySelector("#name");
 const telinput = document.querySelector("#telinput");
+const nameinput = document.querySelector("#nameinput");
 const botonForm = document.querySelector("#botonform");
 const btnRegistro = document.querySelector(".btn-registro");
 const btnLogin = document.querySelector(".btn-login");
@@ -16,6 +18,7 @@ const btnDinamico = document.querySelector("#btn-dinamico");
 const emailError = document.querySelector("#emailError");
 const passwordError = document.querySelector("#passwordError");
 const telError = document.querySelector("#telError");
+const nameError = document.querySelector("#nameError");
 
 // Función para validar
 function validarFormulario(e, fromulario, esRegistro = false) {
@@ -53,13 +56,19 @@ function validarFormulario(e, fromulario, esRegistro = false) {
     telinput.classList.add("error");
     valid = false;
   }
-
-
+  
+  if (esRegistro && nameinput.value <3) {
+    nameError.textContent = "Mínimo 3 caracteres";
+    nameError.style.display = "block";
+    nameinput.classList.add("error");
+    valid = false;
+  }
+  
   if (valid) {
     fromulario.submit();
     //const formData = new FormData(formulario);
     //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
-//
+    //
     //fetch(formulario.action, {
     //  method: "POST",
     //  body: formData,
@@ -74,7 +83,7 @@ function validarFormulario(e, fromulario, esRegistro = false) {
     //    }
     //  })
     //  .catch(error => console.error("Error:", error));
-  }//
+  } //
 }
 
 // Validación para login y registro
@@ -93,7 +102,7 @@ btnDinamico.addEventListener("click", function (event) {
   [telinput, email, password].forEach((input) =>
     input.classList.remove("error")
   );
-  [telError, emailError, passwordError].forEach(
+  [telError, nameError, emailError, passwordError].forEach(
     (input) => (input.style.display = "none")
   );
   //formulario.classList.add("cambiar");
@@ -108,6 +117,7 @@ btnDinamico.addEventListener("click", function (event) {
   const esRegistro = btnDinamico.classList.contains("btn-login");
   if (esRegistro) {
     telContainer.style.display = "none";
+    nameContainer.style.display = "none";
     btnDinamico.classList.add("btn-registro");
     btnDinamico.classList.remove("btn-login");
     botonForm.innerText = "Entrar";
@@ -121,6 +131,7 @@ btnDinamico.addEventListener("click", function (event) {
     formulario.classList.remove("formulario");
 
     telContainer.style.display = "block";
+    nameContainer.style.display = "block";
     btnDinamico.classList.add("btn-login");
     botonForm.innerText = "Registrar";
     formulario.classList.add("registro");
@@ -128,4 +139,14 @@ btnDinamico.addEventListener("click", function (event) {
 
     btnDinamico.classList.remove("btn-registro");
   }
+});
+
+
+document.getElementById("nameinput").addEventListener("input", function () {
+  let nameinput = this;
+  let nameError = document.getElementById("nameError");
+
+  // Eliminar caracteres no permitidos (espacio y guion "-")
+  nameinput.value = nameinput.value.replace(/[ \-]/g, "");
+
 });

@@ -1,6 +1,8 @@
 <?php
 session_start();
 session_destroy();
-header("Location: index.php");
+require_once 'config.php';
+
+header("Location: $REDIRECT_URL");
 exit();
 ?>
