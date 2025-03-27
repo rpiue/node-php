@@ -10,13 +10,8 @@ if (isset($_SESSION['user'])) {
 $error = "";
 $codeJs = "";
 $p_alert = '
-<p  style="color: red; background: #0c0c0c;
-    border-radius: 5px;" 
-                                
-                                
-                                class="<?php if ($error) {
-                                    echo "mb-6";
-                                }  ?>"><?php echo $error; ?></p>';
+<p id="error-p" ></p>';
+$isRegister = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitización y validación de datos
@@ -77,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "name" => $user["nombre"],
                     "tel" => $tel
                 ];
-                header("Location: $REDIRECT_URL/dashboard");
+                header("Location: $REDIRECT_URL/public/dashboard.php");
                 exit();
             } else {
                 $error = "Error en la respuesta de la API.";
@@ -92,11 +87,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     document.getElementById("btn-dinamico").click();
 
                 setTimeout(() => {
-                    
-                    document.getElementById("error-p").style.display = "block"
-                    }, 500);
-            
-                    });
+            let errorP = document.getElementById("error-p");
+            if (errorP) {
+                errorP.style.display = "block";
+            }
+        }, 500);
+
         </script>';
             $p_alert = '
 <p id="error-p" style="color: red; background: #0c0c0c;
@@ -327,6 +323,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
         <?php if ($error) {
             echo $p_alert;
+        }else{
+            echo '<p id="error-p"></p>';
         } ?>
 
         <form id="form" class="formulario" method="POST" autocomplete="off">

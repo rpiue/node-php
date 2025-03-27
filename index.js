@@ -188,7 +188,7 @@ app.post("/register", async (req, res) => {
   });
 
   if (auth) {
-    res.status.json({ email: newUser.email, nombre: newUser.name });
+    res.status.json({ email: email, nombre: name });
   } else {
     return res
       .status(400)
