@@ -43,6 +43,8 @@ const generarContenido = () => {
 };
 
 app.get("/dashboard-ult", (req, res) => {
+  console.log("dashboard XDDD")
+
   res.sendFile(path.join(__dirname, "public", "dasboard.html"));
 });
 
@@ -158,6 +160,7 @@ app.use(
 
 app.post("/auth", async (req, res) => {
   const { email, password } = req.body;
+  console.log("Login", email, password)
 
   if (!email || !password) {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
@@ -176,6 +179,7 @@ app.post("/auth", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   const { email, name, password } = req.body;
+  console.log("register", email, name, password)
 
   if (!email || !name || !password) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
