@@ -4,7 +4,7 @@ FROM debian:latest
 # Instala PHP, Apache, Node.js y dependencias necesarias
 RUN apt-get update && apt-get install -y \
     apache2 php libapache2-mod-php \
-    php-curl php-json php-mbstring php-xml php-session \
+    php-curl php-json php-mbstring php-xml php-common \
     curl nodejs npm && \
     a2enmod rewrite && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
