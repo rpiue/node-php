@@ -20,11 +20,22 @@ $isRegister = false;
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta";
     // Sanitización y validación de datos
-    $email = array_key_exists('email', $_POST) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
-    $password = array_key_exists('password', $_POST) ? trim($_POST['password']) : "";
-    $name = array_key_exists('name', $_POST) ? trim($_POST['name']) : null;
-    $tel = array_key_exists('telefono', $_POST) ? trim($_POST['telefono']) : null;
+    $email = isset($_POST['email']) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
+    $password = isset($_POST['password']) ? trim($_POST['password']) : "";
+    $name = isset($_POST['name']) ? trim($_POST['name']) : null;
+    $tel = isset($_POST['telefono']) ? trim($_POST['telefono']) : null;
 
+    echo "Haciendo la consulta 01<br>";
+    
+    if (!$email) {
+        die("❌ ERROR: Falta el email.");
+    }
+    if (!$password) {
+        die("❌ ERROR: Falta la contraseña.");
+    }
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        die("❌ ERROR: El email no es válido.");
+    }
     echo "Haciendo la consulta 01";
 
     // Validar email
