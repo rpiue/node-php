@@ -55,20 +55,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // Enviar datos a la API
+        
+
         $ch = curl_init($api_url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
             CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => json_encode($data)
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_FAILONERROR => true
         ]);
 
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch); // Captura errores de cURL
         curl_close($ch);
 
         // Manejo de respuesta
-        if ($http_code === 200 && $response) {
+        if ($curl_error) {
+            $error = "Error en la solicitud cURL: " . $curl_error;
+        } elseif ($http_code === 200 && $response) {
             $user = json_decode($response, true);
             if (isset($user["email"]) && isset($user["nombre"])) {
                 $_SESSION['user'] = [

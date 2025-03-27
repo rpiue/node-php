@@ -16,7 +16,8 @@ RUN rm -rf /var/www/html/*
 RUN echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "display_startup_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "error_reporting = E_ALL" >> /etc/php/8.2/apache2/php.ini && \
-    echo "log_errors = Off" >> /etc/php/8.2/apache2/php.ini
+    echo "log_errors = Off" >> /etc/php/8.2/apache2/php.ini && \
+    echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini
 
 
 # Define el directorio de trabajo para Apache
