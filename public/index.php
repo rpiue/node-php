@@ -3,6 +3,20 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+echo "Probando cURL...<br>";
+$ch = curl_init("https://www.google.com/");
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+$response = curl_exec($ch);
+$curl_error = curl_error($ch);
+curl_close($ch);
+
+if ($curl_error) {
+    echo "❌ Error en cURL: $curl_error";
+} else {
+    echo "✅ cURL funciona correctamente";
+}
+
+
 session_start();
 require_once 'config.php';
 
