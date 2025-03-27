@@ -10,7 +10,7 @@ if (isset($_SESSION['user'])) {
 $error = "";
 $codeJs = "";
 $p_alert = '
-<p style="color: red; background: #0c0c0c;
+<p  style="color: red; background: #0c0c0c;
     border-radius: 5px;" 
                                 
                                 
