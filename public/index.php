@@ -35,7 +35,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
-        $api_url = $isRegister ? "http://localhost:3000/register" : "http://localhost:3000/auth";
+        $api_url = $isRegister ? "https://node-php.onrender.com/register" : "https://node-php.onrender.com/auth";
 
         // Datos a enviar
         $data = [
