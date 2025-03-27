@@ -9,7 +9,14 @@ if (isset($_SESSION['user'])) {
 
 $error = "";
 $codeJs = "";
-$p_alert = '';
+$p_alert = '
+<p style="color: red; background: #0c0c0c;
+    border-radius: 5px;" 
+                                
+                                
+                                class="<?php if ($error) {
+                                    echo "mb-6";
+                                }  ?>"><?php echo $error; ?></p>';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitización y validación de datos
