@@ -1,5 +1,4 @@
 <?php
-header("Content-Type: application/json");
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -28,17 +27,20 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     exit();
 }
 
+header("Content-Type: application/json");
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta";
-    $jsonData = json_decode(file_get_contents("php://input"), true);
-
-    // Luego, si no es JSON, intentamos obtener los datos desde $_POST
-    if ($jsonData) {
-        echo json_encode(["mensaje" => "Datos recibidos correctamente desde JSON", "data" => $jsonData]);
-    } elseif (!empty($_POST)) {
-        echo json_encode(["mensaje" => "Datos recibidos correctamente desde POST", "data" => $_POST]);
+    if (!empty($_POST)) {
+        echo json_encode(["success" => true, "data" => $_POST]);
     } else {
-        echo json_encode(["error" => "No se recibieron datos en JSON ni en POST"]);
+        // Intenta recibir JSON
+        $jsonData = json_decode(file_get_contents("php://input"), true);
+        if (!empty($jsonData)) {
+            echo json_encode(["success" => true, "data" => $jsonData]);
+        } else {
+            echo json_encode(["error" => "No se recibieron datos en JSON ni en POST"]);
+        }
     }
 
     echo "<pre>";
