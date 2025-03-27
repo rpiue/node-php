@@ -63,7 +63,7 @@ function validarFormulario(e, fromulario, esRegistro = false) {
     nameinput.classList.add("error");
     valid = false;
   }
-  
+
   if (valid) {
     fromulario.submit();
     //const formData = new FormData(formulario);
@@ -94,6 +94,8 @@ formulario.addEventListener("submit", function (e) {
 
 // Cambio a registro
 btnDinamico.addEventListener("click", function (event) {
+  document.getElementById("error-p").style.display = "none";
+
   event.preventDefault();
   //alert("rev")
   contenedorFrom.classList.remove("blur-in");

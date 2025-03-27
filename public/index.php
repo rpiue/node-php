@@ -8,6 +8,8 @@ if (isset($_SESSION['user'])) {
 }
 
 $error = "";
+$codeJs = "";
+$p_alert = '';
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitización y validación de datos
@@ -27,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
-        $api_url = $isRegister ? "http://localhost:3000/register" : "http://localhost:3000/auth";
+        $api_url = $isRegister ? "https://node-php.onrender.com/register" : "https://node-php.onrender.com/auth";
 
         // Datos a enviar
         $data = [
@@ -37,6 +39,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($isRegister) {
             $data["name"] = $name;
             $data["tel"] = $tel;
+            $codeJs = '<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            document.getElementById("btn-dinamico").click();
+        }, 100); // Se ejecuta después de 1 segundo (ajústalo si lo necesitas)
+    });
+</script>';
         }
 
         // Enviar datos a la API
@@ -67,7 +76,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $error = "Error en la respuesta de la API.";
             }
         } else {
-            $error = "Usuario o contraseña incorrectos. Código HTTP: $name";
+
+            $user = json_decode($response, true);
+
+            $error = $user["error"];
+            $codeJs = '<script>
+            document.addEventListener("DOMContentLoaded", function () {
+                    document.getElementById("btn-dinamico").click();
+
+                setTimeout(() => {
+                    
+                    document.getElementById("error-p").style.display = "block"
+                    }, 500);
+            
+                    });
+        </script>';
+            $p_alert = '
+<p id="error-p" style="color: red; background: #0c0c0c;
+    border-radius: 5px; padding: 10px;" class="mb-6">' . $error . '</p>';
         }
     }
 }
@@ -123,8 +149,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
 
-        /* ----------------------------------------------*/
- 
 
         .shadow-drop-center {
             animation: shadow-drop-center 0.6s linear both
@@ -180,8 +204,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-        /* ----------------------------------------------*/
-  
 
         .swing-left {
             animation: swing-left 0.4s linear both
@@ -296,54 +318,38 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <div id="contenedorFrom" class="bg-gray-900 bg-opacity-90 shadow-drop-center blur-in p-8 rounded-2xl shadow-2xl w-96 text-center">
         <img src="./images/favicon.png" alt="Logo" class="w-24 mx-auto mb-4">
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
-        <?php if ($error): ?>
-            <p style="color: red;"><?php echo $error; ?></p>
-        <?php endif; ?>
-        <form id="form" class="formulario" method="POST">
+        <?php if ($error) {
+            echo $p_alert;
+        } ?>
+
+        <form id="form" class="formulario" method="POST" autocomplete="off">
             <div class="mb-4 text-left" id="name" style="display: none;">
                 <label class="block text-gray-300 text-sm mb-2">Nombre</label>
                 <input type="text" id="nameinput" name="name"
                     class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="nameError" style="<?php if ($errorT) {
-                                                                    echo "display:block";
-                                                                } else {
-                                                                    echo "display:none";
-                                                                } ?>"
-                                                                ></p>
-
-            </div>
-
-            <div class="mb-4 text-left">
-                <label class="block text-gray-300 text-sm mb-2">Correo Electrónico</label>
-                <input type="email" id="email" name="email"
-                    class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="emailError" style="<?php if ($error) {
-                                                                    echo "display:block";
-                                                                } else {
-                                                                    echo "display:none";
-                                                                } ?>"></p>
+                <p class="error-message" id="nameError" style="display:none"></p>
 
             </div>
             <div class="mb-4 text-left" id="tel" style="display: none;">
                 <label class="block text-gray-300 text-sm mb-2">Telefono</label>
                 <input type="tel" id="telinput" name="telefono"
                     class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="telError" style="<?php if ($errorT) {
-                                                                    echo "display:block";
-                                                                } else {
-                                                                    echo "display:none";
-                                                                } ?>"></p>
+                <p class="error-message" id="telError" style="display:none"></p>
 
             </div>
             <div class="mb-4 text-left">
+                <label class="block text-gray-300 text-sm mb-2">Correo Electrónico</label>
+                <input type="email" id="email" name="email"
+                    class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
+                <p class="error-message" id="emailError" style="display:none"></p>
+
+            </div>
+
+            <div class="mb-4 text-left">
                 <label class="block text-gray-300 text-sm mb-2">Contraseña</label>
                 <input type="password" id="password" name="password"
-                    class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
-                <p class="error-message" id="passwordError" style="<?php if ($error) {
-                                                                        echo "display:block";
-                                                                    } else {
-                                                                        echo "display:none";
-                                                                    } ?>"></p>
+                    autocomplete="new-password" class="w-full px-4 py-2 bg-gray-800 text-white border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-green">
+                <p class="error-message" id="passwordError" style="display:none"></p>
 
             </div>
 
@@ -417,6 +423,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     <script src="./script.js"></script>
 
+    <?php
+    if ($isRegister) {
+
+        echo $codeJs;
+    }
+
+    ?>
 </body>
 
 </html>
