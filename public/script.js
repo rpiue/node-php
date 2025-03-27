@@ -75,7 +75,7 @@ function validarFormulario(e, fromulario, esRegistro = false) {
     });
 
     // Muestra los datos en consola antes de enviarlos
-    alert("Datos enviados:", formEntries);
+    alert("Datos enviados: " + JSON.stringify(formEntries, null, 2));
 
     // Enviar el formulario
     fromulario.submit();
