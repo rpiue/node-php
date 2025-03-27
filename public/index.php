@@ -21,9 +21,24 @@ $codeJs = "";
 $p_alert = '
 <p id="error-p"></p>';
 $isRegister = false;
+if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
+    http_response_code(200);
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta";
+    $jsonData = json_decode(file_get_contents("php://input"), true);
+
+    // Luego, si no es JSON, intentamos obtener los datos desde $_POST
+    if ($jsonData) {
+        echo json_encode(["mensaje" => "Datos recibidos correctamente desde JSON", "data" => $jsonData]);
+    } elseif (!empty($_POST)) {
+        echo json_encode(["mensaje" => "Datos recibidos correctamente desde POST", "data" => $_POST]);
+    } else {
+        echo json_encode(["error" => "No se recibieron datos en JSON ni en POST"]);
+    }
+
     echo "<pre>";
     print_r($_POST);
     echo "</pre>";
