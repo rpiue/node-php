@@ -3,7 +3,7 @@ FROM debian:latest
 
 # Instala PHP, Apache, Node.js y dependencias necesarias
 RUN apt-get update && apt-get install -y \
-    apache2 php libapache2-mod-php curl nodejs npm && \
+    apache2 php libapache2-mod-php php-curl php-json php-mbstring curl nodejs npm && \
     a2enmod rewrite && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
@@ -15,6 +15,8 @@ WORKDIR /var/www/html
 
 # Copia los archivos PHP al directorio web de Apache
 COPY public/ /var/www/html/
+
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \

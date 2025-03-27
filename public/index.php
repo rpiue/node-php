@@ -10,7 +10,7 @@ if (isset($_SESSION['user'])) {
 $error = "";
 $codeJs = "";
 $p_alert = '
-<p id="error-p" ></p>';
+<p id="error-p"></p>';
 $isRegister = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
@@ -72,7 +72,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     "name" => $user["nombre"],
                     "tel" => $tel
                 ];
-                header("Location: $REDIRECT_URL/public/dashboard.php");
+                header("Location: $REDIRECT_URL/dashboard");
                 exit();
             } else {
                 $error = "Error en la respuesta de la API.";
