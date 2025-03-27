@@ -65,25 +65,22 @@ function validarFormulario(e, fromulario, esRegistro = false) {
   }
 
   if (valid) {
+    // Captura los datos del formulario
+    const formData = new FormData(fromulario);
+
+    // Convierte los datos a un objeto para mostrar en consola
+    const formEntries = {};
+    formData.forEach((value, key) => {
+        formEntries[key] = value;
+    });
+
+    // Muestra los datos en consola antes de enviarlos
+    alert("Datos enviados:", formEntries);
+
+    // Enviar el formulario
     fromulario.submit();
-    //const formData = new FormData(formulario);
-    //formData.append("tipo", esRegistro ? "registro" : "login"); // Asegurar que 'tipo' se envíe
-    //
-    //fetch(formulario.action, {
-    //  method: "POST",
-    //  body: formData,
-    //})
-    //  .then(response => response.json())
-    //  .then(data => {
-    //    if (data.error) {
-    //      alert(data.error); // Mostrar el mensaje de error del servidor
-    //    } else {
-    //      //alert(data.message); // Mostrar mensaje de éxito
-    //      //window.location.href = "/dashboard"; // Redirigir si es necesario
-    //    }
-    //  })
-    //  .catch(error => console.error("Error:", error));
-  } //
+}
+
 }
 
 // Validación para login y registro
