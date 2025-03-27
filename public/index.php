@@ -29,6 +29,12 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta";
+
+    var_dump($_SERVER['REQUEST_METHOD']); // Verifica si es realmente POST
+    var_dump(file_get_contents("php://input")); // Muestra el cuerpo de la solicitud
+    var_dump($_POST);
+
+
     if (!empty($_POST)) {
         echo json_encode(["success" => true, "data" => $_POST]);
     } else {
@@ -51,9 +57,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $tel = isset($_POST['telefono']) ? trim($_POST['telefono']) : null;
 
     echo "Haciendo la consulta 01<br>";
-    
+
     if (!$email) {
-        die("❌ ERROR: Falta el email.". $_POST['email']);
+        die("❌ ERROR: Falta el email." . $_POST['email']);
     }
     if (!$password) {
         die("❌ ERROR: Falta la contraseña.");
@@ -378,12 +384,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <img src="./images/favicon.png" alt="Logo" class="w-24 mx-auto mb-4">
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
         <?php if ($error) {
-            if($p_alert){
+            if ($p_alert) {
 
                 echo $p_alert;
-            }else{
-                echo '<p id="error-p">'.$p_alert.'</p>';
-
+            } else {
+                echo '<p id="error-p">' . $p_alert . '</p>';
             }
         } else {
             echo '<p id="error-p"></p>';
