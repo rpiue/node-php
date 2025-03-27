@@ -56,6 +56,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
         echo "\nHaciendo la consulta 02";
         $error = "El correo debe ser una dirección válida de Gmail.";
+        echo "\nHaciendo la consulta 02";
     } elseif (strlen($password) < 6) {
         echo "\nHaciendo la consulta 03";
         $error = "La contraseña debe tener al menos 6 caracteres.";
@@ -366,7 +367,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <img src="./images/favicon.png" alt="Logo" class="w-24 mx-auto mb-4">
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
         <?php if ($error) {
-            echo $p_alert;
+            if($p_alert){
+
+                echo $p_alert;
+            }else{
+                echo '<p id="error-p">'.$p_alert.'</p>';
+
+            }
         } else {
             echo '<p id="error-p"></p>';
         } ?>
