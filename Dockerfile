@@ -13,12 +13,26 @@ RUN apt-get update && apt-get install -y \
 # 🔥 Elimina cualquier archivo HTML/PHP predeterminado
 RUN rm -rf /var/www/html/*
 
-# Configuración de PHP para mostrar errores
+
+# Configuración de PHP para recibir JSON y POST correctamente
 RUN echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "display_startup_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "error_reporting = E_ALL" >> /etc/php/8.2/apache2/php.ini && \
     echo "log_errors = Off" >> /etc/php/8.2/apache2/php.ini && \
-    echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini
+    echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini && \
+    echo "post_max_size = 50M" >> /etc/php/8.2/apache2/php.ini && \
+    echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini
+
+
+# Configuración de Apache para permitir POST y CORS
+RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
+    echo "    Require all granted" >> /etc/apache2/apache2.conf && \
+    echo "    <Limit POST>" >> /etc/apache2/apache2.conf && \
+    echo "        Require all granted" >> /etc/apache2/apache2.conf && \
+    echo "    </Limit>" >> /etc/apache2/apache2.conf && \
+    echo "</Directory>" >> /etc/apache2/apache2.conf
+
 
 # Habilita CORS y permite cualquier solicitud GET, POST, OPTIONS
 RUN echo "<IfModule mod_headers.c>" >> /etc/apache2/apache2.conf && \
@@ -41,7 +55,7 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
-    
+
 
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \
