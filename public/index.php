@@ -19,8 +19,8 @@ $isRegister = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Sanitización y validación de datos
-    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $password = trim($_POST['password']);
+    $email = array_key_exists('email', $_POST) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
+    $password = array_key_exists('password', $_POST) ? trim($_POST['password']) : "";
     $name = array_key_exists('name', $_POST) ? trim($_POST['name']) : null;
     $tel = array_key_exists('telefono', $_POST) ? trim($_POST['telefono']) : null;
 
@@ -327,7 +327,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <h2 id="title" class="text-3xl font-bold text-neon-green mb-6">Iniciar sesión</h2>
         <?php if ($error) {
             echo $p_alert;
-        }else{
+        } else {
             echo '<p id="error-p"></p>';
         } ?>
 
