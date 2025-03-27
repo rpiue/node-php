@@ -29,12 +29,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Validar email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
+        echo "\nHaciendo la consulta 02";
         $error = "El correo debe ser una dirección válida de Gmail.";
     } elseif (strlen($password) < 6) {
+        echo "\nHaciendo la consulta 03";
         $error = "La contraseña debe tener al menos 6 caracteres.";
     } elseif (($name && strlen($name) < 3) || ($tel && !preg_match("/^\d{9,15}$/", $tel))) {
+        echo "\nHaciendo la consulta 04";
         $error = "Nombre o teléfono no válidos.";
     } else {
+        echo "\nHaciendo la consulta 05";
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
         $api_url = $isRegister ? "https://node-php.onrender.com/register" : "https://node-php.onrender.com/auth";
