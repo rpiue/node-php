@@ -27,8 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     exit();
 }
 
-header("Content-Type: application/json");
-
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta";
     if (!empty($_POST)) {
