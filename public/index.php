@@ -11,19 +11,21 @@ if (isset($_SESSION['user'])) {
     exit();
 }
 
-$error = "";
+$error = "eSTO ES DEL php";
 $codeJs = "";
 $p_alert = '
 <p id="error-p"></p>';
 $isRegister = false;
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    echo "Haciendo la consulta";
     // Sanitización y validación de datos
     $email = array_key_exists('email', $_POST) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
     $password = array_key_exists('password', $_POST) ? trim($_POST['password']) : "";
     $name = array_key_exists('name', $_POST) ? trim($_POST['name']) : null;
     $tel = array_key_exists('telefono', $_POST) ? trim($_POST['telefono']) : null;
 
+    echo "Haciendo la consulta 01";
 
     // Validar email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
@@ -36,6 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
         $api_url = $isRegister ? "https://node-php.onrender.com/register" : "https://node-php.onrender.com/auth";
+        echo "Haciendo la consulta a la API";
 
         // Datos a enviar
         $data = [
@@ -55,7 +58,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         // Enviar datos a la API
-        
+
 
         $ch = curl_init($api_url);
         curl_setopt_array($ch, [
@@ -73,6 +76,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         // Manejo de respuesta
         if ($curl_error) {
+            echo "Error en la solicitud cURL: " . $curl_error;
+
             $error = "Error en la solicitud cURL: " . $curl_error;
         } elseif ($http_code === 200 && $response) {
             $user = json_decode($response, true);
