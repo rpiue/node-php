@@ -78,5 +78,4 @@ RUN npm install --production
 EXPOSE 80 3000
 
 # Iniciar Apache y Node.js correctamente
-CMD service apache2 start && tail -f /dev/null
-#&& node /app/index.js && tail -f /dev/null
+CMD service apache2 start && node /app/index.js && tail -f /dev/null
