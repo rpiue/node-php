@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
 # Instala PHP, Apache, Node.js y sus dependencias
 RUN apt-get update && apt-get install -y \
     apache2 php8.2 php8.2-fpm libapache2-mod-fcgid \
-    php8.2-curl php8.2-json php8.2-mbstring php8.2-xml php8.2-common \
+    php8.2-curl php-json php8.2-mbstring php8.2-xml php8.2-common \
     php8.2-cli php8.2-zip php8.2-tokenizer php8.2-bcmath php8.2-fileinfo \
     curl nodejs npm && \
     a2enmod rewrite headers proxy_fcgi setenvif && \
