@@ -27,7 +27,7 @@ RUN echo "display_errors = On" >> $PHP_INI_DIR && \
 
 # Configuración de Apache (habilitar CORS)
 COPY apache-cors.conf /etc/apache2/conf-available/cors.conf
-RUN a2enconf cors && service apache2 restart
+RUN a2enconf cors
 
 
 # Configuración de Apache para permitir POST y CORS
@@ -62,9 +62,9 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
 
-    
+
 COPY apache-override.conf /etc/apache2/conf-available/override.conf
-RUN a2enconf override && service apache2 restart
+RUN a2enconf override
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \
     service apache2 restart
