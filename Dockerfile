@@ -1,7 +1,12 @@
-# Usa Debian como base
+# Usa Debian estable como base
 FROM debian:latest
 
-# Instala PHP 8.2 y Apache correctamente
+# Actualiza los repositorios y agrega el repositorio de PHP de SURY
+RUN apt-get update && apt-get install -y lsb-release apt-transport-https ca-certificates curl && \
+    curl -sSL https://packages.sury.org/php/apt.gpg | apt-key add - && \
+    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
+
+# Instala PHP, Apache, Node.js y sus dependencias
 RUN apt-get update && apt-get install -y \
     apache2 php8.2 php8.2-fpm libapache2-mod-fcgid \
     php8.2-curl php8.2-json php8.2-mbstring php8.2-xml php8.2-common \
@@ -11,20 +16,18 @@ RUN apt-get update && apt-get install -y \
     a2enconf php8.2-fpm && \
     echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# 🔥 Elimina archivos HTML/PHP predeterminados
+# 🔥 Elimina cualquier archivo HTML/PHP predeterminado
 RUN rm -rf /var/www/html/*
 
 # Configuración de PHP
-RUN mkdir -p /etc/php/8.2/apache2/ && \
-    echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "display_startup_errors = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "error_reporting = E_ALL" >> /etc/php/8.2/apache2/php.ini && \
-    echo "log_errors = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "error_log = /var/log/php_errors.log" >> /etc/php/8.2/apache2/php.ini && \
-    echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "post_max_size = 50M" >> /etc/php/8.2/apache2/php.ini && \
-    echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini && \
-    echo "always_populate_raw_post_data=-1" >> /etc/php/8.2/apache2/php.ini
+RUN mkdir -p /etc/php/8.2/fpm/ && \
+    echo "display_errors = On" >> /etc/php/8.2/fpm/php.ini && \
+    echo "display_startup_errors = On" >> /etc/php/8.2/fpm/php.ini && \
+    echo "error_reporting = E_ALL" >> /etc/php/8.2/fpm/php.ini && \
+    echo "log_errors = Off" >> /etc/php/8.2/fpm/php.ini && \
+    echo "allow_url_fopen = On" >> /etc/php/8.2/fpm/php.ini && \
+    echo "post_max_size = 50M" >> /etc/php/8.2/fpm/php.ini && \
+    echo "upload_max_filesize = 50M" >> /etc/php/8.2/fpm/php.ini
 
 # Configuración de Apache para permitir POST y CORS
 RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
@@ -32,7 +35,7 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
 
-# Habilita CORS y configuración de métodos HTTP
+# Habilita CORS
 RUN echo "<IfModule mod_headers.c>" >> /etc/apache2/apache2.conf && \
     echo "    Header always set Access-Control-Allow-Origin '*'" >> /etc/apache2/apache2.conf && \
     echo "    Header always set Access-Control-Allow-Methods 'GET, POST, OPTIONS'" >> /etc/apache2/apache2.conf && \
@@ -63,5 +66,5 @@ RUN npm install --production
 # Expone los puertos 80 (Apache) y 3000 (Node.js)
 EXPOSE 80 3000
 
-# Comando para iniciar Apache y Node.js correctamente en Render
+# Iniciar Apache y Node.js correctamente
 CMD service php8.2-fpm start && apachectl -D FOREGROUND & node /app/index.js
