@@ -15,13 +15,19 @@ RUN rm -rf /var/www/html/*
 
 
 # Configuración de PHP para recibir JSON y POST correctamente
-RUN echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "display_startup_errors = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "error_reporting = E_ALL" >> /etc/php/8.2/apache2/php.ini && \
-    echo "log_errors = Off" >> /etc/php/8.2/apache2/php.ini && \
-    echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini && \
-    echo "post_max_size = 50M" >> /etc/php/8.2/apache2/php.ini && \
-    echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini
+RUN echo "display_errors = On" >> $PHP_INI_DIR && \
+    echo "display_startup_errors = On" >> $PHP_INI_DIR && \
+    echo "error_reporting = E_ALL" >> $PHP_INI_DIR && \
+    echo "log_errors = Off" >> $PHP_INI_DIR && \
+    echo "allow_url_fopen = On" >> $PHP_INI_DIR && \
+    echo "post_max_size = 50M" >> $PHP_INI_DIR && \
+    echo "upload_max_filesize = 50M" >> $PHP_INI_DIR && \
+    echo "always_populate_raw_post_data = -1" >> $PHP_INI_DIR && \
+    echo "cgi.fix_pathinfo=0" >> $PHP_INI_DIR
+
+# Configuración de Apache (habilitar CORS)
+COPY apache-cors.conf /etc/apache2/conf-available/cors.conf
+RUN a2enconf cors && service apache2 restart
 
 
 # Configuración de Apache para permitir POST y CORS
@@ -56,11 +62,9 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
 
-
-
-RUN echo "always_populate_raw_post_data = -1" >> /etc/php/8.2/apache2/php.ini && \
-    echo "cgi.fix_pathinfo=0" >> /etc/php/8.2/apache2/php.ini
-
+    
+COPY apache-override.conf /etc/apache2/conf-available/override.conf
+RUN a2enconf override && service apache2 restart
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \
     service apache2 restart
