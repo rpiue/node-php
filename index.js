@@ -209,7 +209,9 @@ app.use(
     changeOrigin: true,
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-      if (req.method === "POST") {
+
+      // Permitir el paso de datos en POST y archivos multimedia
+      if (req.method === "POST" || req.method === "PUT") {
         let body = [];
         req.on("data", (chunk) => body.push(chunk));
         req.on("end", () => {
@@ -217,9 +219,37 @@ app.use(
         });
       }
     },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
+    },
   })
 );
 
+
+app.use(
+  "/login",
+  createProxyMiddleware({
+    target: "http://localhost/index.php",
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+
+      // Permitir el paso de datos en POST y archivos multimedia
+      if (req.method === "POST" || req.method === "PUT") {
+        let body = [];
+        req.on("data", (chunk) => body.push(chunk));
+        req.on("end", () => {
+          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
+        });
+      }
+    },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
+    },
+  })
+);
 
 
 app.use(

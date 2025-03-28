@@ -358,7 +358,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo '<p id="error-p"></p>';
         } ?>
 
-        <p><?php echo isset($_GET['datos']) ? 'Datos: '. $_GET['datos'] : 'no hay'; ?></p>
+        <p style="color: white"><?php echo isset($_GET['datos']) ? 'Datos: '. $_GET['datos'] : 'no hay'; ?></p>
         
 
         <form id="form" class="formulario" method="POST" autocomplete="off">
