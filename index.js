@@ -201,32 +201,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
-app.use(
-  "/",
-  createProxyMiddleware({
-    target: "http://localhost",
-    changeOrigin: true,
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-
-      // Permitir el paso de datos en POST y archivos multimedia
-      if (req.method === "POST" || req.method === "PUT") {
-        let body = [];
-        req.on("data", (chunk) => body.push(chunk));
-        req.on("end", () => {
-          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
-        });
-      }
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
-    },
-  })
-);
-
-
 app.use(
   "/login",
   createProxyMiddleware({
@@ -257,13 +231,33 @@ app.use(
 );
 
 
+// Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
 app.use(
-  "/dashboard",
+  "/",
   createProxyMiddleware({
-    target: "http://localhost/dashboard.php", // Apache en el puerto 80
+    target: "http://localhost",
     changeOrigin: true,
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+
+      // Permitir el paso de datos en POST y archivos multimedia
+      if (req.method === "POST" || req.method === "PUT") {
+        let body = [];
+        req.on("data", (chunk) => body.push(chunk));
+        req.on("end", () => {
+          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
+        });
+      }
+    },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
+    },
   })
 );
+
+
+
 
 
 // Evento de conexión de Socket.IO
