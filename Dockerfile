@@ -39,7 +39,7 @@ RUN echo "<IfModule mod_headers.c>" >> /etc/apache2/apache2.conf && \
     echo "    Header always set Access-Control-Allow-Origin '*'" >> /etc/apache2/apache2.conf && \
     echo "    Header always set Access-Control-Allow-Methods 'GET, POST, OPTIONS'" >> /etc/apache2/apache2.conf && \
     echo "    Header always set Access-Control-Allow-Headers 'Authorization, Content-Type'" >> /etc/apache2/apache2.conf && \
-    echo "</IfModule>" >> /etc/apache2/apache2.con
+    echo "</IfModule>" >> /etc/apache2/apache2.conf
 
 
 # Define el directorio de trabajo para Apache
@@ -55,6 +55,12 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
+
+
+
+RUN echo "always_populate_raw_post_data = -1" >> /etc/php/8.2/apache2/php.ini && \
+    echo "cgi.fix_pathinfo=0" >> /etc/php/8.2/apache2/php.ini && \
+    service apache2 restart
 
 
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
