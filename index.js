@@ -202,33 +202,30 @@ app.post("/register", async (req, res) => {
 });
 
 app.use(
-  "/login",
+  '/login',
   createProxyMiddleware({
-    target: "https://hack-web.onrender.com/index.php", // Apache corriendo en el puerto 80
+    target: 'http://localhost/index.php', // Cambiar a localhost o la URL de tu contenedor de Apache en Render
     changeOrigin: true,
+    pathRewrite: {
+      '^/login': '/index.php',
+    },
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
-      if (req.method === "POST") {
-        let bodyData = [];
-
-        req.on("data", (chunk) => bodyData.push(chunk));
-        req.on("end", () => {
-          const rawData = Buffer.concat(bodyData).toString();
-          console.log("📄 Datos enviados:", rawData);
-
-          // Si hay datos, enviarlos al proxy
-          proxyReq.setHeader("Content-Length", Buffer.byteLength(rawData));
-          proxyReq.write(rawData);
-        });
+      if (req.body) {
+        let bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader('Content-Type', 'application/json');
+        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
       }
     },
     onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
+      console.error('❌ Error en el proxy:', err);
+      res.status(500).json({ error: 'Error en el proxy' });
     },
   })
 );
+
 
 
 // Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
