@@ -6,7 +6,6 @@ error_reporting(E_ALL);
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type");
 
 
 session_start();
@@ -68,12 +67,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $data["name"] = $name;
             $data["tel"] = $tel;
             $codeJs = '<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        setTimeout(() => {
+            document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(() => {
             document.getElementById("btn-dinamico").click();
-        }, 100); // Se ejecuta después de 1 segundo (ajústalo si lo necesitas)
-    });
-</script>';
+            }, 100);
+            });
+            </script>';
         }
 
         // Enviar datos a la API
@@ -85,20 +84,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($data),
-            //CURLOPT_FAILONERROR => true
         ]);
 
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        //$curl_error = curl_error($ch); // Captura errores de cURL
         curl_close($ch);
 
-        // Manejo de respuesta
-        //if ($curl_error) {
-        //    echo "Error en la solicitud cURL: " . $curl_error;
-//
-        //    $error = "Error en la solicitud cURL: " . $curl_error;
-        //}
         if ($http_code === 200 && $response) {
             $user = json_decode($response, true);
             if (isset($user["email"]) && isset($user["nombre"])) {
@@ -130,8 +121,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         </script>';
             $p_alert = '
-<p id="error-p" style="color: red; background: #0c0c0c;
-    border-radius: 5px; padding: 10px;" class="mb-6">' . $error . '</p>';
+            <p id="error-p" style="color: red; background: #0c0c0c;
+            border-radius: 5px; padding: 10px;" class="mb-6">' . $error . '</p>';
         }
     }
 }
