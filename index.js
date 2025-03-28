@@ -232,7 +232,6 @@ app.use(
   createProxyMiddleware({
     target: "https://hack-web.onrender.com/index.php", // Apache corriendo en el puerto 80
     changeOrigin: true,
-    pathRewrite: { "^/login": "/index.php" }, // Redirige /login a /index.php
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
