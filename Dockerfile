@@ -15,24 +15,27 @@ RUN rm -rf /var/www/html/*
 
 
 # Configuración de PHP para recibir JSON y POST correctamente
-RUN echo "display_errors = On" >> /etc/php/*/apache2/php.ini && \
-    echo "display_startup_errors = On" >> /etc/php/*/apache2/php.ini && \
-    echo "error_reporting = E_ALL" >> /etc/php/*/apache2/php.ini && \
-    echo "log_errors = Off" >> /etc/php/*/apache2/php.ini && \
-    echo "allow_url_fopen = On" >> /etc/php/*/apache2/php.ini && \
-    echo "post_max_size = 50M" >> /etc/php/*/apache2/php.ini && \
-    echo "upload_max_filesize = 50M" >> /etc/php/*/apache2/php.ini && \
-    echo "cgi.fix_pathinfo=0" >> /etc/php/*/apache2/php.ini
-
-# Copia archivos de configuración si existen
-RUN if [ -f apache-override.conf ]; then cp apache-override.conf /etc/apache2/conf-available/override.conf; else echo "override.conf no encontrado"; fi
-
-COPY apache-override.conf /etc/apache2/conf-available/override.conf || echo "override.conf no encontrado"
+RUN echo "display_errors = On" >> $PHP_INI_DIR && \
+    echo "display_startup_errors = On" >> $PHP_INI_DIR && \
+    echo "error_reporting = E_ALL" >> $PHP_INI_DIR && \
+    echo "log_errors = Off" >> $PHP_INI_DIR && \
+    echo "allow_url_fopen = On" >> $PHP_INI_DIR && \
+    echo "post_max_size = 50M" >> $PHP_INI_DIR && \
+    echo "upload_max_filesize = 50M" >> $PHP_INI_DIR && \
+    echo "always_populate_raw_post_data = -1" >> $PHP_INI_DIR && \
+    echo "cgi.fix_pathinfo=0" >> $PHP_INI_DIR
 
 
-# Verifica que los archivos de configuración existen antes de habilitarlos
-RUN test -f /etc/apache2/conf-available/cors.conf && a2enconf cors || echo "cors.conf no encontrado"
-RUN test -f /etc/apache2/conf-available/override.conf && a2enconf override || echo "override.conf no encontrado"
+
+# Configuración de Apache para permitir POST y CORS
+RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
+    echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
+    echo "    Require all granted" >> /etc/apache2/apache2.conf && \
+    echo "    <Limit POST>" >> /etc/apache2/apache2.conf && \
+    echo "        Require all granted" >> /etc/apache2/apache2.conf && \
+    echo "    </Limit>" >> /etc/apache2/apache2.conf && \
+    echo "</Directory>" >> /etc/apache2/apache2.conf
+
 
 # Habilita CORS y permite cualquier solicitud GET, POST, OPTIONS
 RUN echo "<IfModule mod_headers.c>" >> /etc/apache2/apache2.conf && \
@@ -57,8 +60,7 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
 
 
-COPY apache-override.conf /etc/apache2/conf-available/override.conf
-RUN a2enconf override
+
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \
     service apache2 restart
