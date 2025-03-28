@@ -230,12 +230,12 @@ app.use(
 app.use(
   "/login",
   createProxyMiddleware({
-    target: "http://localhost/index.php",
+    target: "http://localhost", // Debe apuntar al servidor, no al archivo
     changeOrigin: true,
+    pathRewrite: { "^/login": "/index.php" }, // Reescribe /login como /index.php
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
-      // Permitir el paso de datos en POST y archivos multimedia
       if (req.method === "POST" || req.method === "PUT") {
         let body = [];
         req.on("data", (chunk) => body.push(chunk));
