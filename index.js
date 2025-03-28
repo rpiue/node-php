@@ -14,7 +14,6 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
-app.use(cors());
 // Middleware para servir archivos estáticos desde la carpeta "public"
 app.use(express.static("public"));
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
@@ -42,6 +41,7 @@ const generarContenido = () => {
     )
     .join("");
 };
+app.use(cors({ origin: '*' }));
 
 app.get("/dashboard-ult", (req, res) => {
   console.log("dashboard XDDD")
@@ -230,17 +230,23 @@ app.use(
 app.use(
   "/login",
   createProxyMiddleware({
-    target: "http://localhost", // Debe apuntar al servidor, no al archivo
+    target: "https://hack-web.onrender.com/index.php", // Apache corriendo en el puerto 80
     changeOrigin: true,
-    pathRewrite: { "^/login": "/index.php" }, // Reescribe /login como /index.php
+    pathRewrite: { "^/login": "/index.php" }, // Redirige /login a /index.php
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
-      if (req.method === "POST" || req.method === "PUT") {
-        let body = [];
-        req.on("data", (chunk) => body.push(chunk));
+      if (req.method === "POST") {
+        let bodyData = [];
+
+        req.on("data", (chunk) => bodyData.push(chunk));
         req.on("end", () => {
-          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
+          const rawData = Buffer.concat(bodyData).toString();
+          console.log("📄 Datos enviados:", rawData);
+
+          // Si hay datos, enviarlos al proxy
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(rawData));
+          proxyReq.write(rawData);
         });
       }
     },
