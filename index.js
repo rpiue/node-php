@@ -204,10 +204,19 @@ app.post("/register", async (req, res) => {
 app.use(
   "/",
   createProxyMiddleware({
-    target: "http://localhost/inicio.html", // Apache en el puerto 80
+    target: "http://localhost",
     changeOrigin: true,
+    selfHandleResponse: false, // Permite que Apache maneje la respuesta
+    onProxyReq: (proxyReq, req, res) => {
+      if (req.method === "POST" && req.body) {
+        let bodyData = JSON.stringify(req.body);
+        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
+    },
   })
 );
+
 
 app.use(
   "/dashboard",
