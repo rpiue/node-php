@@ -59,9 +59,7 @@ RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
 
 
 RUN echo "always_populate_raw_post_data = -1" >> /etc/php/8.2/apache2/php.ini && \
-    echo "cgi.fix_pathinfo=0" >> /etc/php/8.2/apache2/php.ini && \
-    service apache2 restart
-
+    echo "cgi.fix_pathinfo=0" >> /etc/php/8.2/apache2/php.ini
 
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
 RUN echo "DirectoryIndex index.php index.html" > /etc/apache2/mods-enabled/dir.conf && \
