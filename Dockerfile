@@ -2,7 +2,12 @@
 FROM debian:latest
 
 # Actualiza los repositorios y agrega el repositorio de PHP de SURY
-RUN apt-get update && apt-get install -y lsb-release apt-transport-https ca-certificates curl && \
+RUN apt-get update && apt-get install -y \
+    lsb-release \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg && \
     curl -sSL https://packages.sury.org/php/apt.gpg | apt-key add - && \
     echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 
