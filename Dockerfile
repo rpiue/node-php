@@ -21,15 +21,17 @@ RUN echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "log_errors = Off" >> /etc/php/8.2/apache2/php.ini && \
     echo "allow_url_fopen = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "post_max_size = 50M" >> /etc/php/8.2/apache2/php.ini && \
-    echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini && \
-    echo "always_populate_raw_post_data=-1" >> /etc/php/8.2/apache2/php.ini
+    echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini
 
 
 # Configuración de Apache para permitir POST y CORS
 RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
-    echo "</Directory>" >> /etc/apache2/apache2.con
+    echo "    <Limit POST>" >> /etc/apache2/apache2.conf && \
+    echo "        Require all granted" >> /etc/apache2/apache2.conf && \
+    echo "    </Limit>" >> /etc/apache2/apache2.conf && \
+    echo "</Directory>" >> /etc/apache2/apache2.conf
 
 
 # Habilita CORS y permite cualquier solicitud GET, POST, OPTIONS
