@@ -3,6 +3,7 @@ const { createProxyMiddleware } = require("http-proxy-middleware");
 const path = require("path");
 const { redesSociales } = require("./DB/config");
 const { registerUser, getUserByEmail } = require("./DB/firebase");
+const { Buffer } = require("buffer");
 
 const fs = require("fs");
 const http = require("http");
@@ -206,16 +207,19 @@ app.use(
   createProxyMiddleware({
     target: "http://localhost",
     changeOrigin: true,
-    selfHandleResponse: false, // Permite que Apache maneje la respuesta
     onProxyReq: (proxyReq, req, res) => {
-      if (req.method === "POST" && req.body) {
-        let bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+      if (req.method === "POST") {
+        let body = [];
+        req.on("data", (chunk) => body.push(chunk));
+        req.on("end", () => {
+          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
+        });
       }
     },
   })
 );
+
 
 
 app.use(
