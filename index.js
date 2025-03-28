@@ -202,30 +202,35 @@ app.post("/register", async (req, res) => {
 });
 
 app.use(
-  '/login',
+  "/login",
   createProxyMiddleware({
-    target: 'http://localhost/index.php', // Cambiar a localhost o la URL de tu contenedor de Apache en Render
+    target: "http://localhost", // O la URL de tu servidor Apache en Render
     changeOrigin: true,
     pathRewrite: {
-      '^/login': '/index.php',
+      "^/login": "/index.php", // Redirige las solicitudes a index.php
     },
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
-      if (req.body) {
+      if (req.method === "POST" || req.method === "PUT") {
         let bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader('Content-Type', 'application/json');
-        proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
+
+        console.log("📄 Enviando datos al backend:", bodyData);
+
+        // Configurar las cabeceras necesarias
+        proxyReq.setHeader("Content-Type", "application/json");
+        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+
+        // Escribir el body en la solicitud proxy
         proxyReq.write(bodyData);
       }
     },
     onError: (err, req, res) => {
-      console.error('❌ Error en el proxy:', err);
-      res.status(500).json({ error: 'Error en el proxy' });
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
     },
   })
 );
-
 
 
 // Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
