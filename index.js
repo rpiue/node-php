@@ -206,14 +206,6 @@ app.use(
   createProxyMiddleware({
     target: "http://localhost/inicio.html", // Apache en el puerto 80
     changeOrigin: true,
-    selfHandleResponse: false,
-    onProxyReq: (proxyReq, req, res) => {
-      if (req.body) {
-        let bodyData = JSON.stringify(req.body);
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
-      }
-    },
   })
 );
 
