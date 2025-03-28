@@ -207,22 +207,31 @@ app.use(
     target: "http://localhost", // O la URL de tu servidor Apache en Render
     changeOrigin: true,
     pathRewrite: {
-      "^/login": "/index.php", // Redirige las solicitudes a index.php
+      "^/login": "/index.php", // Redirige a index.php
     },
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
       if (req.method === "POST" || req.method === "PUT") {
-        let bodyData = JSON.stringify(req.body);
+        let bodyData;
+
+        if (req.is("application/json")) {
+          bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+        } else if (req.is("application/x-www-form-urlencoded")) {
+          bodyData = new URLSearchParams(req.body).toString();
+          proxyReq.setHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+        }
 
         console.log("📄 Enviando datos al backend:", bodyData);
 
-        // Configurar las cabeceras necesarias
-        proxyReq.setHeader("Content-Type", "application/json");
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-
-        // Escribir el body en la solicitud proxy
-        proxyReq.write(bodyData);
+        if (bodyData) {
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
       }
     },
     onError: (err, req, res) => {
