@@ -50,6 +50,21 @@ COPY public/ /var/www/html/
 
 RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
+
+# Configuración de Apache para servir solo `index.php`
+RUN echo "<VirtualHost *:80>" > /etc/apache2/sites-available/000-default.conf && \
+    echo "    DocumentRoot /var/www/html" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    <Files \"index.php\">" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    </Files>" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    <Location />" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "        ProxyPass http://localhost:3000/" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "        ProxyPassReverse http://localhost:3000/" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "    </Location>" >> /etc/apache2/sites-available/000-default.conf && \
+    echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf
+
+# Habilita el módulo Proxy en Apache
+RUN a2enmod proxy proxy_http && service apache2 restart
 # Configuración de Apache para permitir URL amigables
 RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
     echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
@@ -73,6 +88,7 @@ COPY DB/ /app/DB
 
 # Instala dependencias de Node.js
 RUN npm install --production
+
 
 # Expone los puertos 80 (Apache) y 3000 (Node.js)
 EXPOSE 80 3000

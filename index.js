@@ -202,6 +202,23 @@ app.post("/register", async (req, res) => {
 });
 
 // Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
+app.use(
+  "/",
+  createProxyMiddleware({
+    target: "http://localhost",
+    changeOrigin: true,
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+      if (req.method === "POST") {
+        let body = [];
+        req.on("data", (chunk) => body.push(chunk));
+        req.on("end", () => {
+          console.log("📄 Datos enviados:", Buffer.concat(body).toString());
+        });
+      }
+    },
+  })
+);
 
 
 
