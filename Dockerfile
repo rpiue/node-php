@@ -25,8 +25,9 @@ RUN echo "display_errors = On" >> /etc/php/*/apache2/php.ini && \
     echo "cgi.fix_pathinfo=0" >> /etc/php/*/apache2/php.ini
 
 # Copia archivos de configuración si existen
-COPY apache-cors.conf /etc/apache2/conf-available/cors.conf
-COPY apache-override.conf /etc/apache2/conf-available/override.conf
+COPY apache-cors.conf /etc/apache2/conf-available/cors.conf || echo "cors.conf no encontrado"
+COPY apache-override.conf /etc/apache2/conf-available/override.conf || echo "override.conf no encontrado"
+
 
 # Verifica que los archivos de configuración existen antes de habilitarlos
 RUN test -f /etc/apache2/conf-available/cors.conf && a2enconf cors || echo "cors.conf no encontrado"
