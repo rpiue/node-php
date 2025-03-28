@@ -17,10 +17,9 @@ if (isset($_SESSION['user'])) {
     exit();
 }
 
-$error = "eSTO ES DEL php";
+$error = "";
 $codeJs = "";
-$p_alert = '
-<p id="error-p"></p>';
+$p_alert = '';
 $isRegister = false;
 if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
     http_response_code(200);
@@ -28,28 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    echo "Haciendo la consulta";
-
-    var_dump($_SERVER['REQUEST_METHOD']); // Verifica si es realmente POST
-    var_dump(file_get_contents("php://input")); // Muestra el cuerpo de la solicitud
-    var_dump($_POST);
-
-
-    if (!empty($_POST)) {
-        echo json_encode(["success" => true, "data" => $_POST]);
-    } else {
-        // Intenta recibir JSON
-        $jsonData = json_decode(file_get_contents("php://input"), true);
-        if (!empty($jsonData)) {
-            echo json_encode(["success" => true, "data" => $jsonData]);
-        } else {
-            echo json_encode(["error" => "No se recibieron datos en JSON ni en POST"]);
-        }
-    }
-
-    echo "<pre>";
-    print_r($_POST);
-    echo "</pre>";
+   
     // Sanitización y validación de datos
     $email = isset($_POST['email']) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
     $password = isset($_POST['password']) ? trim($_POST['password']) : "";
@@ -59,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     echo "Haciendo la consulta 01<br>";
 
     if (!$email) {
-        die("❌ ERROR: Falta el email." . $_POST['email']);
+        die("❌ ERROR: Falta el email.");
     }
     if (!$password) {
         die("❌ ERROR: Falta la contraseña.");
@@ -71,21 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // Validar email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
-        echo "\nHaciendo la consulta 02";
         $error = "El correo debe ser una dirección válida de Gmail.";
-        echo "\nHaciendo la consulta 02";
     } elseif (strlen($password) < 6) {
-        echo "\nHaciendo la consulta 03";
         $error = "La contraseña debe tener al menos 6 caracteres.";
     } elseif (($name && strlen($name) < 3) || ($tel && !preg_match("/^\d{9,15}$/", $tel))) {
-        echo "\nHaciendo la consulta 04";
         $error = "Nombre o teléfono no válidos.";
     } else {
-        echo "\nHaciendo la consulta 05";
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
         $api_url = $isRegister ? "https://node-php.onrender.com/register" : "https://node-php.onrender.com/auth";
-        echo "Haciendo la consulta a la API";
 
         // Datos a enviar
         $data = [
@@ -113,20 +85,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             CURLOPT_HTTPHEADER => ["Content-Type: application/json"],
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($data),
-            CURLOPT_FAILONERROR => true
+            //CURLOPT_FAILONERROR => true
         ]);
 
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curl_error = curl_error($ch); // Captura errores de cURL
+        //$curl_error = curl_error($ch); // Captura errores de cURL
         curl_close($ch);
 
         // Manejo de respuesta
-        if ($curl_error) {
-            echo "Error en la solicitud cURL: " . $curl_error;
-
-            $error = "Error en la solicitud cURL: " . $curl_error;
-        } elseif ($http_code === 200 && $response) {
+        //if ($curl_error) {
+        //    echo "Error en la solicitud cURL: " . $curl_error;
+//
+        //    $error = "Error en la solicitud cURL: " . $curl_error;
+        //}
+        if ($http_code === 200 && $response) {
             $user = json_decode($response, true);
             if (isset($user["email"]) && isset($user["nombre"])) {
                 $_SESSION['user'] = [
@@ -143,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $user = json_decode($response, true);
 
-            $error = $user["error"];
+            $error = $response .' '.$http_code;
             $codeJs = '<script>
             document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("btn-dinamico").click();
@@ -388,7 +361,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 echo $p_alert;
             } else {
-                echo '<p id="error-p">' . $p_alert . '</p>';
+                echo '<p id="error-p">' . $error . '</p>';
             }
         } else {
             echo '<p id="error-p"></p>';
