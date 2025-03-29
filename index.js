@@ -17,22 +17,13 @@ const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static("public"));
 
 app.use((req, res, next) => {
   console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
   console.log("📦 Cuerpo recibido:", req.body);
   next();
 });
-
-app.use((req, res, next) => {
-  if (req.path.match(/\.(php|sh|exe|bat|cmd|ps1)$/)) {
-    console.warn(`🚫 Bloqueando intento de descarga: ${req.path}`);
-    return res.status(403).send("❌ Acceso denegado");
-  }
-  next();
-});
-
 
 
 app.use(
@@ -75,7 +66,7 @@ app.use(
   })
 );
 
-const apacheRoutes = ["/", "/contacto", "/blog"];
+const apacheRoutes = ["/", "/contacto", "/blog", "/images", "/pages"];
 
 // Middleware para redirigir solo las rutas específicas a Apache
 app.use((req, res, next) => {

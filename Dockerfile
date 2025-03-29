@@ -24,14 +24,6 @@ RUN echo "display_errors = On" >> /etc/php/8.2/apache2/php.ini && \
     echo "upload_max_filesize = 50M" >> /etc/php/8.2/apache2/php.ini
 
 
-# Configuración de Apache para permitir POST y CORS
-RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
-    echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
-    echo "    Require all granted" >> /etc/apache2/apache2.conf && \
-    echo "    <Limit POST>" >> /etc/apache2/apache2.conf && \
-    echo "        Require all granted" >> /etc/apache2/apache2.conf && \
-    echo "    </Limit>" >> /etc/apache2/apache2.conf && \
-    echo "</Directory>" >> /etc/apache2/apache2.conf
 
 
 # Habilita CORS y permite cualquier solicitud GET, POST, OPTIONS
@@ -52,9 +44,11 @@ RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html
 
 # Configuración de Apache para permitir URL amigables
 RUN echo "<Directory /var/www/html/>" >> /etc/apache2/apache2.conf && \
+    echo "    Options Indexes FollowSymLinks" >> /etc/apache2/apache2.conf && \
     echo "    AllowOverride All" >> /etc/apache2/apache2.conf && \
     echo "    Require all granted" >> /etc/apache2/apache2.conf && \
     echo "</Directory>" >> /etc/apache2/apache2.conf
+
 
 
 # 🔧 Configuración de Apache para deshabilitar páginas por defecto
@@ -68,6 +62,7 @@ WORKDIR /app
 COPY index.js package.json  /app/
 
 COPY DB/ /app/DB
+COPY public/ /app/public
 
 
 
