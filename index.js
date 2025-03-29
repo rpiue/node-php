@@ -255,44 +255,26 @@ app.use(
 app.use(
   "/",
   createProxyMiddleware({
-    target: "http://localhost", // Servidor Apache con PHP
+    target: "http://localhost", // Apache con PHP
     changeOrigin: true,
     selfHandleResponse: false, // Permitir respuestas sin modificar
     onProxyReq: (proxyReq, req, res) => {
       console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
 
+      // Si es una petición POST/PUT, no modificar el cuerpo
       if (req.method === "POST" || req.method === "PUT") {
-        let bodyData;
-
-        if (req.is("application/json")) {
-          bodyData = JSON.stringify(req.body);
-          proxyReq.setHeader("Content-Type", "application/json");
-        } else if (req.is("application/x-www-form-urlencoded")) {
-          bodyData = querystring.stringify(req.body);
-          proxyReq.setHeader("Content-Type", "application/x-www-form-urlencoded");
-        } else if (req.is("multipart/form-data")) {
-          console.log("📎 Se recibió un formulario con archivos.");
-          return; // Para multipart, Node maneja los datos automáticamente
-        }
-
-        if (bodyData) {
-          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-          proxyReq.write(bodyData);
-        }
-
-        console.log("📄 Enviando datos al backend:", bodyData);
+        console.log("📄 Datos enviados al backend PHP:", req.body);
       }
     },
     onProxyRes: (proxyRes, req, res) => {
       let responseBody = [];
-
       proxyRes.on("data", (chunk) => responseBody.push(chunk));
       proxyRes.on("end", () => {
         const finalBody = Buffer.concat(responseBody).toString();
         console.log("🔄 Respuesta del servidor PHP:", finalBody);
       });
 
-      // Configurar CORS en la respuesta del proxy
+      // CORS
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
       res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
@@ -303,6 +285,7 @@ app.use(
     },
   })
 );
+
 
 // Evento de conexión de Socket.IO
 io.on("connection", (socket) => {
