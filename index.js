@@ -16,14 +16,12 @@ const PORT = process.env.PORT || 3000;
 const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
-app.use(express.static("public"));
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
 app.use((req, res, next) => {
   console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
   console.log("📦 Cuerpo recibido:", req.body);
   next();
 });
-
 
 
 app.use(
@@ -66,23 +64,33 @@ app.use(
   })
 );
 
-app.use(
-  "/",
-  (req, res, next) => {
-    if (req.url.endsWith(".php")) {
-      // ✅ Si la URL termina en .php, pasarla al proxy (Apache con PHP)
-      createProxyMiddleware({
-        target: "http://localhost", // Apache con PHP
-        changeOrigin: true,
-        selfHandleResponse: false,
-      })(req, res, next);
-    } else {
-      // ❌ Si NO es un archivo PHP, continuar con Express
-      next();
-    }
-  }
-);
+const apacheRoutes = ["/", "/contacto", "/blog"];
 
+// Middleware para redirigir solo las rutas específicas a Apache
+app.use((req, res, next) => {
+  if (apacheRoutes.includes(req.path) || req.path.endsWith(".php")) {
+    return createProxyMiddleware({
+      target: "http://localhost", // Asegúrate de que Apache esté escuchando en este puerto
+      changeOrigin: true,
+      selfHandleResponse: false,
+      pathRewrite: { "^/": "/" }, // Asegura que la URL no se altere
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`📡 Redirigiendo a Apache: ${req.url}`);
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(`🔄 Respuesta desde Apache: ${req.url}`);
+      },
+      onError: (err, req, res) => {
+        console.error("❌ Error en el proxy:", err.message);
+        res.status(500).json({ error: "Error en el proxy", details: err.message });
+      },
+    })(req, res, next);
+  } else {
+    next(); // Continúa con Express
+  }
+});
+
+app.use(express.static("public"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Habilita el soporte para formularios
