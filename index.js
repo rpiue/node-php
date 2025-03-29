@@ -4,6 +4,7 @@ const path = require("path");
 const { redesSociales } = require("./DB/config");
 const { registerUser, getUserByEmail } = require("./DB/firebase");
 const { Buffer } = require("buffer");
+const querystring = require("querystring");
 
 const fs = require("fs");
 const http = require("http");
@@ -258,15 +259,20 @@ app.use(
         if (req.is("application/json")) {
           bodyData = JSON.stringify(req.body);
           proxyReq.setHeader("Content-Type", "application/json");
-        } else {
-          bodyData = querystring.stringify(req.body); // 🔥 Asegurar que los datos estén bien formateados
+        } else if (req.is("application/x-www-form-urlencoded")) {
+          bodyData = querystring.stringify(req.body);
           proxyReq.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        } else if (req.is("multipart/form-data")) {
+          console.log("📎 Se recibió un formulario con archivos.");
+          return; // Para multipart, Node maneja los datos automáticamente
         }
 
-        console.log("📄 Enviando datos:", bodyData);
+        if (bodyData) {
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
 
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
+        console.log("📄 Enviando datos al backend:", bodyData);
       }
     },
     onProxyRes: (proxyRes, req, res) => {
@@ -277,16 +283,18 @@ app.use(
         const finalBody = Buffer.concat(responseBody).toString();
         console.log("🔄 Respuesta del servidor PHP:", finalBody);
       });
+
+      // Configurar CORS en la respuesta del proxy
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
+      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
     },
     onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
+      console.error("❌ Error en el proxy:", err.message);
+      res.status(500).json({ error: "Error en el proxy", details: err.message });
     },
   })
 );
-
-
-
 
 // Evento de conexión de Socket.IO
 io.on("connection", (socket) => {
