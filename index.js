@@ -10,7 +10,6 @@ const fs = require("fs");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
-app.use(cors({ origin: '*' }));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +17,7 @@ const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
 app.use(express.static("public"));
+app.use(cors({ origin: "*" }));
 
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
 app.use((req, res, next) => {
@@ -25,8 +25,6 @@ app.use((req, res, next) => {
   console.log("📦 Cuerpo recibido:", req.body);
   next();
 });
-
-
 
 app.use(
   "/login",
@@ -88,11 +86,12 @@ app.use(
     },
     onError: (err, req, res) => {
       console.error("❌ Error en el proxy:", err.message);
-      res.status(500).json({ error: "Error en el proxy", details: err.message });
+      res
+        .status(500)
+        .json({ error: "Error en el proxy", details: err.message });
     },
   })
 );
-
 
 // Habilita el soporte para formularios
 
@@ -118,11 +117,16 @@ const generarContenido = () => {
     .join("");
 };
 
-app.get("/dashboard-ult",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
-  console.log("dashboard XDDD")
+app.get(
+  "/dashboard-ult",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  (req, res) => {
+    console.log("dashboard XDDD");
 
-  res.sendFile(path.join(__dirname, "public", "dasboard.html"));
-});
+    res.sendFile(path.join(__dirname, "public", "dasboard.html"));
+  }
+);
 
 // Ruta para obtener contenido dinámico
 const rutasValidas = {
@@ -149,82 +153,96 @@ const archivosHTML = {
   },
 };
 
-app.get("/contenido",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
-  const { tipo, plataforma } = req.query;
-  if (plataforma) {
-    const archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
-
-    if (archivo) {
-      fs.readFile(
-        path.join(__dirname, "public", `pages/${archivo}`),
-        "utf8",
-        (err, data) => {
-          if (err) {
-            return res.status(500).send("Error al cargar el contenido");
-          }
-          res.send(data);
-        }
-      );
-    } else {
-      res.status(404).send("<h2>Contenido no encontrado</h2>");
-    }
-  } else {
-    if (tipo) {
-      const archivo = rutasValidas[tipo];
+app.get(
+  "/contenido",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  (req, res) => {
+    const { tipo, plataforma } = req.query;
+    if (plataforma) {
+      const archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
 
       if (archivo) {
         fs.readFile(
-          path.join(__dirname, "public", archivo),
+          path.join(__dirname, "public", `pages/${archivo}`),
           "utf8",
           (err, data) => {
             if (err) {
               return res.status(500).send("Error al cargar el contenido");
             }
-            // Reemplaza {{contenido}} con los datos dinámicos
-            let contenidoDinamico = data
-              .replace("{{contenido}}", generarContenido())
-              .replace(
-                "'variables'",
-                `const servidores = ${JSON.stringify(redesSociales, null, 2)};`
-              );
-
-            res.send(contenidoDinamico);
+            res.send(data);
           }
         );
       } else {
-        res.status(404).send("<h2>Sección no encontrada</h2>");
+        res.status(404).send("<h2>Contenido no encontrado</h2>");
+      }
+    } else {
+      if (tipo) {
+        const archivo = rutasValidas[tipo];
+
+        if (archivo) {
+          fs.readFile(
+            path.join(__dirname, "public", archivo),
+            "utf8",
+            (err, data) => {
+              if (err) {
+                return res.status(500).send("Error al cargar el contenido");
+              }
+              // Reemplaza {{contenido}} con los datos dinámicos
+              let contenidoDinamico = data
+                .replace("{{contenido}}", generarContenido())
+                .replace(
+                  "'variables'",
+                  `const servidores = ${JSON.stringify(
+                    redesSociales,
+                    null,
+                    2
+                  )};`
+                );
+
+              res.send(contenidoDinamico);
+            }
+          );
+        } else {
+          res.status(404).send("<h2>Sección no encontrada</h2>");
+        }
       }
     }
   }
-});
+);
 
 // Ruta para devolver solo el contenido de cada sección (sin recargar toda la página)
-app.get("/contenidoXD/:seccion",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
-  const archivo = rutasValidas[req.params.seccion];
+app.get(
+  "/contenidoXD/:seccion",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  (req, res) => {
+    const archivo = rutasValidas[req.params.seccion];
 
-  if (archivo) {
-    fs.readFile(
-      path.join(__dirname, "public", archivo),
-      "utf8",
-      (err, data) => {
-        if (err) {
-          return res.status(500).send("Error al cargar el contenido");
+    if (archivo) {
+      fs.readFile(
+        path.join(__dirname, "public", archivo),
+        "utf8",
+        (err, data) => {
+          if (err) {
+            return res.status(500).send("Error al cargar el contenido");
+          }
+          // Reemplaza {{contenido}} con los datos dinámicos
+          let contenidoDinamico = data
+            .replace("{{contenido}}", generarContenido())
+            .replace(
+              "{{variables}}",
+              `const servidores = ${JSON.stringify(redesSociales, null, 2)};`
+            );
+
+          res.send(contenidoDinamico);
         }
-        // Reemplaza {{contenido}} con los datos dinámicos
-        let contenidoDinamico = data
-          .replace("{{contenido}}", generarContenido())
-          .replace(
-            "{{variables}}",
-            `const servidores = ${JSON.stringify(redesSociales, null, 2)};`
-          );
-
-        res.send(contenidoDinamico);
-      }
-    );
-  } else {
-    res.status(404).send("<h2>Sección no encontrada</h2>");
+      );
+    } else {
+      res.status(404).send("<h2>Sección no encontrada</h2>");
+    }
   }
-});
+);
 
 app.use(
   "/dashboard",
@@ -234,49 +252,63 @@ app.use(
   })
 );
 
-app.post("/auth", express.json(), express.urlencoded({ extended: true }), async (req, res) => {
-  const { email, password } = req.body;
-  console.log("Login", email, password)
+app.post(
+  "/auth",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const { email, password } = req.body;
+    console.log("Login", email, password);
 
-  if (!email || !password) {
-    return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
+    if (!email || !password) {
+      return res
+        .status(401)
+        .json({ error: "Usuario o contraseña incorrectos" });
+    }
+    var auth = await getUserByEmail({
+      email: email,
+      password: password,
+    });
+
+    if (auth != null) {
+      res.json({ email: auth.email, nombre: auth.name });
+    } else {
+      return res
+        .status(400)
+        .json({ error: "Usuario o contraseña incorrectos" });
+    }
   }
-  var auth = await getUserByEmail({
-    email: email,
-    password: password,
-  });
+);
 
-  if (auth != null) {
-    res.json({ email: auth.email, nombre: auth.name });
-  } else {
-    return res.status(400).json({ error: "Usuario o contraseña incorrectos" });
+app.post(
+  "/register",
+  express.json(),
+  express.urlencoded({ extended: true }),
+  async (req, res) => {
+    const { email, name, password } = req.body;
+    console.log("register", email, name, password);
+
+    if (!email || !name || !password) {
+      return res
+        .status(400)
+        .json({ error: "Todos los campos son obligatorios" });
+    }
+
+    var auth = await registerUser({
+      email: email,
+      password: password,
+      name: name,
+    });
+
+    if (auth) {
+      res.status.json({ email: email, nombre: name });
+    } else {
+      return res
+        .status(400)
+        .json({ error: "No se puedo crear el usuario por que ya existe" });
+    }
   }
-});
-
-app.post("/register", express.json(), express.urlencoded({ extended: true }), async (req, res) => {
-  const { email, name, password } = req.body;
-  console.log("register", email, name, password)
-
-  if (!email || !name || !password) {
-    return res.status(400).json({ error: "Todos los campos son obligatorios" });
-  }
-
-  var auth = await registerUser({
-    email: email,
-    password: password,
-    name: name,
-  });
-
-  if (auth) {
-    res.status.json({ email: email, nombre: name });
-  } else {
-    return res
-      .status(400)
-      .json({ error: "No se puedo crear el usuario por que ya existe" });
-  }
-});
-
-
+);
 
 // Evento de conexión de Socket.IO
 io.on("connection", (socket) => {
