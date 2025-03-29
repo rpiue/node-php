@@ -243,6 +243,52 @@ app.use(
 
 
 // Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
+app.use(
+  "/",
+  createProxyMiddleware({
+    target: "http://localhost", // URL del servidor Apache con PHP
+    changeOrigin: true,
+    selfHandleResponse: false, // Permitir respuestas sin manipulación
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+
+      if (req.method === "POST" || req.method === "PUT") {
+        let bodyData;
+
+        // Verificar el tipo de contenido
+        if (req.is("application/json")) {
+          bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+        } else {
+          bodyData = new URLSearchParams(req.body).toString();
+          proxyReq.setHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+        }
+
+        console.log("📄 Enviando datos:", bodyData);
+
+        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+        proxyReq.write(bodyData);
+      }
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      let responseBody = [];
+
+      proxyRes.on("data", (chunk) => responseBody.push(chunk));
+      proxyRes.on("end", () => {
+        const finalBody = Buffer.concat(responseBody).toString();
+        console.log("🔄 Respuesta del servidor PHP:", finalBody);
+      });
+    },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
+    },
+  })
+);
+
 
 
 
