@@ -32,8 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = isset($_POST['name']) ? trim($_POST['name']) : null;
     $tel = isset($_POST['telefono']) ? trim($_POST['telefono']) : null;
 
-    echo "Haciendo la consulta 01<br>";
-
     if (!$email) {
         die("❌ ERROR: Falta el email.");
     }
@@ -43,7 +41,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         die("❌ ERROR: El email no es válido.");
     }
-    echo "Haciendo la consulta 01";
 
     // Validar email
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match("/@gmail\.com$/", $email)) {
@@ -356,8 +353,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         } else {
             echo '<p id="error-p"></p>';
         } ?>
-
-        <p style="color: white"><?php echo isset($_GET['datos']) ? 'Datos: '. $_GET['datos'] : 'no hay'; ?></p>
         
 
         <form id="form" class="formulario" action="/" method="POST" enctype="application/x-www-form-urlencoded" autocomplete="off">
