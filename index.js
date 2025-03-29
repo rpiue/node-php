@@ -243,42 +243,6 @@ app.use(
 
 
 // Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
-app.use(
-  "/",
-  createProxyMiddleware({
-    target: "http://localhost", // O la URL de tu servidor con archivos PHP
-    changeOrigin: true,
-    selfHandleResponse: false, // Permite que las respuestas lleguen sin ser manipuladas
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-
-      if (req.method === "POST" || req.method === "PUT") {
-        let bodyData = JSON.stringify(req.body);
-
-        console.log("📄 Datos enviados:", bodyData);
-
-        proxyReq.setHeader("Content-Type", "application/json");
-        proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-        proxyReq.write(bodyData);
-      }
-    },
-    onProxyRes: (proxyRes, req, res) => {
-      let responseBody = [];
-
-      proxyRes.on("data", (chunk) => responseBody.push(chunk));
-      proxyRes.on("end", () => {
-        const finalBody = Buffer.concat(responseBody).toString();
-        console.log("🔄 Respuesta del servidor PHP:", finalBody);
-      });
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
-    },
-  })
-);
-
-
 
 
 
