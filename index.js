@@ -25,6 +25,15 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  if (req.path.match(/\.(php|sh|exe|bat|cmd|ps1)$/)) {
+    console.warn(`🚫 Bloqueando intento de descarga: ${req.path}`);
+    return res.status(403).send("❌ Acceso denegado");
+  }
+  next();
+});
+
+
 
 app.use(
   "/login",
@@ -66,7 +75,7 @@ app.use(
   })
 );
 
-const apacheRoutes = ["/", "/contacto", "/blog", "/images", "/pages"];
+const apacheRoutes = ["/", "/contacto", "/blog"];
 
 // Middleware para redirigir solo las rutas específicas a Apache
 app.use((req, res, next) => {
