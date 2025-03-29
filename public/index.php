@@ -26,8 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "OPTIONS") {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    echo "✅ Datos recibidos en PHP: " . json_encode($_POST);
-
     // Sanitización y validación de datos
     $email = isset($_POST['email']) ? filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL) : "";
     $password = isset($_POST['password']) ? trim($_POST['password']) : "";
@@ -108,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $user = json_decode($response, true);
 
-            $error = $user["error"];
+            $error = $response;
             $codeJs = '<script>
             document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("btn-dinamico").click();
