@@ -10,6 +10,7 @@ const fs = require("fs");
 const http = require("http");
 const socketIo = require("socket.io");
 const cors = require("cors");
+app.use(cors({ origin: '*' }));
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +18,7 @@ const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
 app.use(express.static("public"));
+
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
 app.use((req, res, next) => {
   console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
@@ -66,8 +68,6 @@ app.use(
   })
 );
 
-
-// Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
 app.use(
   "/",
   createProxyMiddleware({
@@ -94,8 +94,7 @@ app.use(
 );
 
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true })); // Habilita el soporte para formularios
+// Habilita el soporte para formularios
 
 // Función para generar el HTML de redes sociales
 const generarContenido = () => {
@@ -118,9 +117,8 @@ const generarContenido = () => {
     )
     .join("");
 };
-app.use(cors({ origin: '*' }));
 
-app.get("/dashboard-ult", (req, res) => {
+app.get("/dashboard-ult",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
   console.log("dashboard XDDD")
 
   res.sendFile(path.join(__dirname, "public", "dasboard.html"));
@@ -151,7 +149,7 @@ const archivosHTML = {
   },
 };
 
-app.get("/contenido", (req, res) => {
+app.get("/contenido",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
   const { tipo, plataforma } = req.query;
   if (plataforma) {
     const archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
@@ -201,7 +199,7 @@ app.get("/contenido", (req, res) => {
 });
 
 // Ruta para devolver solo el contenido de cada sección (sin recargar toda la página)
-app.get("/contenidoXD/:seccion", (req, res) => {
+app.get("/contenidoXD/:seccion",  express.json(), express.urlencoded({ extended: true }), (req, res) => {
   const archivo = rutasValidas[req.params.seccion];
 
   if (archivo) {
@@ -236,7 +234,7 @@ app.use(
   })
 );
 
-app.post("/auth", async (req, res) => {
+app.post("/auth", express.json(), express.urlencoded({ extended: true }), async (req, res) => {
   const { email, password } = req.body;
   console.log("Login", email, password)
 
@@ -255,7 +253,7 @@ app.post("/auth", async (req, res) => {
   }
 });
 
-app.post("/register", async (req, res) => {
+app.post("/register", express.json(), express.urlencoded({ extended: true }), async (req, res) => {
   const { email, name, password } = req.body;
   console.log("register", email, name, password)
 
