@@ -18,6 +18,82 @@ const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
 app.use(express.static("public"));
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
+app.use((req, res, next) => {
+  console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
+  console.log("📦 Cuerpo recibido:", req.body);
+  next();
+});
+
+
+
+app.use(
+  "/login",
+  createProxyMiddleware({
+    target: "http://localhost", // O la URL de tu servidor Apache en Render
+    changeOrigin: true,
+    pathRewrite: {
+      "^/login": "/index.php", // Redirige a index.php
+    },
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
+
+      if (req.method === "POST" || req.method === "PUT") {
+        let bodyData;
+
+        if (req.is("application/json")) {
+          bodyData = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+        } else if (req.is("application/x-www-form-urlencoded")) {
+          bodyData = new URLSearchParams(req.body).toString();
+          proxyReq.setHeader(
+            "Content-Type",
+            "application/x-www-form-urlencoded"
+          );
+        }
+
+        console.log("📄 Enviando datos al backend:", bodyData);
+
+        if (bodyData) {
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
+          proxyReq.write(bodyData);
+        }
+      }
+    },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err);
+      res.status(500).json({ error: "Error en el proxy" });
+    },
+  })
+);
+
+
+// Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
+app.use(
+  "/",
+  createProxyMiddleware({
+    target: "http://localhost", // Apache con PHP
+    changeOrigin: true,
+    selfHandleResponse: false,
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`📡 Middleware Proxy: ${req.method} ${req.url}`);
+      console.log("📄 Datos enviados al backend PHP:", req.body);
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      let responseBody = [];
+      proxyRes.on("data", (chunk) => responseBody.push(chunk));
+      proxyRes.on("end", () => {
+        const finalBody = Buffer.concat(responseBody).toString();
+        console.log("🔄 Respuesta del servidor PHP:", finalBody);
+      });
+    },
+    onError: (err, req, res) => {
+      console.error("❌ Error en el proxy:", err.message);
+      res.status(500).json({ error: "Error en el proxy", details: err.message });
+    },
+  })
+);
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Habilita el soporte para formularios
 
@@ -202,80 +278,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.use((req, res, next) => {
-  console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
-  console.log("📦 Cuerpo recibido:", req.body);
-  next();
-});
-
-
-
-app.use(
-  "/login",
-  createProxyMiddleware({
-    target: "http://localhost", // O la URL de tu servidor Apache en Render
-    changeOrigin: true,
-    pathRewrite: {
-      "^/login": "/index.php", // Redirige a index.php
-    },
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-
-      if (req.method === "POST" || req.method === "PUT") {
-        let bodyData;
-
-        if (req.is("application/json")) {
-          bodyData = JSON.stringify(req.body);
-          proxyReq.setHeader("Content-Type", "application/json");
-        } else if (req.is("application/x-www-form-urlencoded")) {
-          bodyData = new URLSearchParams(req.body).toString();
-          proxyReq.setHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-        }
-
-        console.log("📄 Enviando datos al backend:", bodyData);
-
-        if (bodyData) {
-          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-          proxyReq.write(bodyData);
-        }
-      }
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
-    },
-  })
-);
-
-
-// Proxy SOLO para archivos PHP (redirige todas las solicitudes PHP a Apache)
-app.use(
-  "/",
-  createProxyMiddleware({
-    target: "http://localhost", // Apache con PHP
-    changeOrigin: true,
-    selfHandleResponse: false,
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Middleware Proxy: ${req.method} ${req.url}`);
-      console.log("📄 Datos enviados al backend PHP:", req.body);
-    },
-    onProxyRes: (proxyRes, req, res) => {
-      let responseBody = [];
-      proxyRes.on("data", (chunk) => responseBody.push(chunk));
-      proxyRes.on("end", () => {
-        const finalBody = Buffer.concat(responseBody).toString();
-        console.log("🔄 Respuesta del servidor PHP:", finalBody);
-      });
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err.message);
-      res.status(500).json({ error: "Error en el proxy", details: err.message });
-    },
-  })
-);
 
 
 // Evento de conexión de Socket.IO
