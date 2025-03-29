@@ -205,9 +205,23 @@ app.post("/register", async (req, res) => {
 app.use((req, res, next) => {
   console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
   console.log("📦 Cuerpo recibido:", req.body);
-  next();
-});
 
+  // Enviar datos al script PHP
+  axios
+    .post("http://localhost/index.php", req.body, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+    .then((response) => {
+      console.log("✅ Respuesta del PHP:", response.data);
+      res.json(response.data); // Enviar la respuesta al frontend
+    })
+    .catch((error) => {
+      console.error("❌ Error al enviar datos al PHP:", error.message);
+      res.status(500).json({ error: "Error al conectar con PHP" });
+    });
+});
 
 
 app.use(
