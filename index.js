@@ -202,6 +202,14 @@ app.post("/register", async (req, res) => {
   }
 });
 
+app.use((req, res, next) => {
+  console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
+  console.log("📦 Cuerpo recibido:", req.body);
+  next();
+});
+
+
+
 app.use(
   "/login",
   createProxyMiddleware({
