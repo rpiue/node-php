@@ -257,14 +257,10 @@ app.use(
   createProxyMiddleware({
     target: "http://localhost", // Apache con PHP
     changeOrigin: true,
-    selfHandleResponse: false, // Permitir respuestas sin modificar
+    selfHandleResponse: false,
     onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-
-      // Si es una petición POST/PUT, no modificar el cuerpo
-      if (req.method === "POST" || req.method === "PUT") {
-        console.log("📄 Datos enviados al backend PHP:", req.body);
-      }
+      console.log(`📡 Middleware Proxy: ${req.method} ${req.url}`);
+      console.log("📄 Datos enviados al backend PHP:", req.body);
     },
     onProxyRes: (proxyRes, req, res) => {
       let responseBody = [];
@@ -273,11 +269,6 @@ app.use(
         const finalBody = Buffer.concat(responseBody).toString();
         console.log("🔄 Respuesta del servidor PHP:", finalBody);
       });
-
-      // CORS
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-      res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
     },
     onError: (err, req, res) => {
       console.error("❌ Error en el proxy:", err.message);
