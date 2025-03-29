@@ -23,6 +23,15 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  if (req.path.match(/\.(php|sh|exe|bat|cmd|ps1)$/)) {
+    console.warn(`🚫 Bloqueando intento de descarga: ${req.path}`);
+    return res.status(403).send("❌ Acceso denegado");
+  }
+  next();
+});
+
+app.use(express.static("public"));
 
 app.use(
   "/login",
@@ -89,8 +98,6 @@ app.use((req, res, next) => {
     next(); // Continúa con Express
   }
 });
-
-app.use(express.static("public"));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Habilita el soporte para formularios

@@ -106,7 +106,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $user = json_decode($response, true);
 
-            $error = $response;
+            $error = $user["error"];
             $codeJs = '<script>
             document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("btn-dinamico").click();
