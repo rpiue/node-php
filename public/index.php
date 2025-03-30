@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     } else {
         // Determinar si es autenticación o registro
         $isRegister = !empty($name) && !empty($tel);
-        $api_url = $isRegister ? "https://hack-web.onrender.com/register" : "https://hack-web.onrender.com/auth";
+        $api_url = $isRegister ? "$REDIRECT_URL/register" : "$REDIRECT_URL/auth";
 
         // Datos a enviar
         $data = [
@@ -103,7 +103,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             $user = json_decode($response, true);
 
-            $error = $response;
+            $error = $user["error"];
             $codeJs = '<script>
             document.addEventListener("DOMContentLoaded", function () {
                     document.getElementById("btn-dinamico").click();
