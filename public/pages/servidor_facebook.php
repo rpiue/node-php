@@ -177,14 +177,42 @@
     inputDescripcion.addEventListener("input", actualizarVistaPrevia);
     inputEnlace1.addEventListener("input", actualizarVistaPrevia);
 
+    async function obtenerSesion() {
+        try {
+            fetch('https://node-php-pelk.onrender.com/s', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(JSON.stringify(data, null, 2)); // Muestra el JSON formateado
+                    console.log('Datos recibidos:', data); // Muestra el JSON en la consola
+                })
+                .catch(error => console.error('Error al obtener los datos:', error));
+
+
+
+        } catch (error) {
+            console.error("Error obteniendo sesión:", error);
+            return null;
+        }
+    }
     // Manejar envío del formulario
+    obtenerSesion()
+
     function crearEnlace(tipo) {
         const titulo = inputTitulo.value.trim();
         const descripcion = inputDescripcion.value.trim();
         const enlace = inputEnlace1.value.trim();
         socket.emit("crearEnlace", {
             tipo: tipo,
-            user: <?php echo $_SESSION["user"]["email"]; ?>,
             img: previewImagen.src,
             titulo: titulo || "Facebook - Inicia sesión o regístrate",
             descripcion: descripcion || "Inicia sesión en Facebook para empezar a compartir y conectar con tus amigos, familiares y laspersonas que conoces.",
@@ -197,6 +225,7 @@
     form.addEventListener("submit", function(event) {
         event.preventDefault();
         alert("Holaaa")
+        obtenerSesion()
         actualizarVistaPrevia();
         //crearEnlace('facebook')
 

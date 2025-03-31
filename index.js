@@ -333,25 +333,8 @@ io.on("connection", (socket) => {
         archivosHTML[tipo][id.toLowerCase()]
       );
 
-      try {
-        const response = await axios.get("https://node-php-pelk.onrender.com/s", {
-          withCredentials: true, // Habilita las cookies en la solicitud
-          headers: {
-            Cookie: socket.handshake.headers.cookie, // Pasar cookies de la sesión
-            "User-Agent": "Mozilla/5.0", // Asegurar compatibilidad con el servidor
-          },
-        });
-
-        console.log("Datos de sesión recibidos:", response.data);
-
-        // Enviar contenido PHP + sesión al cliente
-      } catch (sessionError) {
-        console.error("Error al obtener la sesión PHP:", sessionError);
-      }
-  
-      // Enviar la respuesta del servidor PHP al cliente
-      console.log("Solicitando Cache", response.data);
       
+      // Enviar la respuesta del servidor PHP al cliente      
       fs.readFile(rutaArchivo, "utf8", (err, data) => {
         if (err) {
           console.error("Error al leer el archivo:", err);
