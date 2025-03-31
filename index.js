@@ -5,6 +5,7 @@ const { redesSociales } = require("./DB/config");
 const { registerUser, getUserByEmail } = require("./DB/firebase");
 const { Buffer } = require("buffer");
 const querystring = require("querystring");
+const axios = require("axios");
 
 const fs = require("fs");
 const http = require("http");
@@ -34,44 +35,11 @@ app.use((req, res, next) => {
 
 app.use(express.static("public"));
 
-
 app.use(
-  "/login",
+  "/s",
   createProxyMiddleware({
-    target: "http://localhost", // O la URL de tu servidor Apache en Render
+    target: "http://localhost/session-data.php", // Apache en el puerto 80
     changeOrigin: true,
-    pathRewrite: {
-      "^/login": "/index.php", // Redirige a index.php
-    },
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`📡 Petición recibida: ${req.method} a ${req.url}`);
-
-      if (req.method === "POST" || req.method === "PUT") {
-        let bodyData;
-
-        if (req.is("application/json")) {
-          bodyData = JSON.stringify(req.body);
-          proxyReq.setHeader("Content-Type", "application/json");
-        } else if (req.is("application/x-www-form-urlencoded")) {
-          bodyData = new URLSearchParams(req.body).toString();
-          proxyReq.setHeader(
-            "Content-Type",
-            "application/x-www-form-urlencoded"
-          );
-        }
-
-        console.log("📄 Enviando datos al backend:", bodyData);
-
-        if (bodyData) {
-          proxyReq.setHeader("Content-Length", Buffer.byteLength(bodyData));
-          proxyReq.write(bodyData);
-        }
-      }
-    },
-    onError: (err, req, res) => {
-      console.error("❌ Error en el proxy:", err);
-      res.status(500).json({ error: "Error en el proxy" });
-    },
   })
 );
 
@@ -93,7 +61,9 @@ app.use((req, res, next) => {
       },
       onError: (err, req, res) => {
         console.error("❌ Error en el proxy:", err.message);
-        res.status(500).json({ error: "Error en el proxy", details: err.message });
+        res
+          .status(500)
+          .json({ error: "Error en el proxy", details: err.message });
       },
     })(req, res, next);
   } else {
@@ -127,7 +97,7 @@ const generarContenido = () => {
 };
 
 app.get("/dashboard-ult", (req, res) => {
-  console.log("dashboard XDDD")
+  console.log("dashboard XDDD");
 
   res.sendFile(path.join(__dirname, "public", "dasboard.html"));
 });
@@ -157,52 +127,90 @@ const archivosHTML = {
   },
 };
 
-app.get("/contenido", (req, res) => {
+app.get("/contenido", async (req, res) => {
   const { tipo, plataforma } = req.query;
-  if (plataforma) {
-    const archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
+  let archivo;
 
-    if (archivo) {
-      fs.readFile(
-        path.join(__dirname, "public", `pages/${archivo}`),
-        "utf8",
-        (err, data) => {
-          if (err) {
-            return res.status(500).send("Error al cargar el contenido");
-          }
-          res.send(data);
+  if (plataforma) {
+    archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
+  } else if (tipo) {
+    archivo = rutasValidas[tipo];
+  }
+
+  if (archivo) {
+    const filePath = path.join(__dirname, "public", archivo);
+    const ext = path.extname(filePath);
+    
+    if (ext === ".php") {
+      console.log("Es PHP");
+
+      const cookies = req.headers.cookie;
+
+      // Hacer una solicitud al servidor PHP con las cookies
+      const response = await axios.get("https://node-php-pelk.onrender.com/dashboard", {
+        headers: { Cookie: cookies },
+      });
+  
+      // Enviar la respuesta del servidor PHP al cliente
+      console.log("Solicitando Cache", response.data);
+      exec(`php ${filePath}`, (error, stdout, stderr) => {
+        if (error) {
+          return res.status(500).send("Error al ejecutar el script PHP");
         }
-      );
+        res.send(stdout);
+      });
+    } else if (ext === ".html") {
+      console.log("Es HTML");
+      if (plataforma) {
+        const archivo = archivosHTML[tipo]?.[plataforma.toLowerCase()];
+    
+        if (archivo) {
+          fs.readFile(
+            path.join(__dirname, "public", `pages/${archivo}`),
+            "utf8",
+            (err, data) => {
+              if (err) {
+                return res.status(500).send("Error al cargar el contenido");
+              }
+              res.send(data);
+            }
+          );
+        } else {
+          res.status(404).send("<h2>Contenido no encontrado</h2>");
+        }
+      } else {
+        if (tipo) {
+          const archivo = rutasValidas[tipo];
+    
+          if (archivo) {
+            fs.readFile(
+              path.join(__dirname, "public", archivo),
+              "utf8",
+              (err, data) => {
+                if (err) {
+                  return res.status(500).send("Error al cargar el contenido");
+                }
+                // Reemplaza {{contenido}} con los datos dinámicos
+                let contenidoDinamico = data
+                  .replace("{{contenido}}", generarContenido())
+                  .replace(
+                    "'variables'",
+                    `const servidores = ${JSON.stringify(redesSociales, null, 2)};`
+                  );
+    
+                res.send(contenidoDinamico);
+              }
+            );
+          } else {
+            res.status(404).send("<h2>Sección no encontrada</h2>");
+          }
+        }
+      }
     } else {
-      res.status(404).send("<h2>Contenido no encontrado</h2>");
+      res.status(400).send("Formato de archivo no soportado");
     }
   } else {
-    if (tipo) {
-      const archivo = rutasValidas[tipo];
-
-      if (archivo) {
-        fs.readFile(
-          path.join(__dirname, "public", archivo),
-          "utf8",
-          (err, data) => {
-            if (err) {
-              return res.status(500).send("Error al cargar el contenido");
-            }
-            // Reemplaza {{contenido}} con los datos dinámicos
-            let contenidoDinamico = data
-              .replace("{{contenido}}", generarContenido())
-              .replace(
-                "'variables'",
-                `const servidores = ${JSON.stringify(redesSociales, null, 2)};`
-              );
-
-            res.send(contenidoDinamico);
-          }
-        );
-      } else {
-        res.status(404).send("<h2>Sección no encontrada</h2>");
-      }
-    }
+    res.status(404).send("<h2>Contenido no encontrado</h2>");
   }
 });
 
@@ -244,7 +252,7 @@ app.use(
 
 app.post("/auth", async (req, res) => {
   const { email, password } = req.body;
-  console.log("Login", email, password)
+  console.log("Login", email, password);
 
   if (!email || !password) {
     return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
@@ -263,7 +271,7 @@ app.post("/auth", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   const { email, name, password } = req.body;
-  console.log("register", email, name, password)
+  console.log("register", email, name, password);
 
   if (!email || !name || !password) {
     return res.status(400).json({ error: "Todos los campos son obligatorios" });
@@ -284,8 +292,6 @@ app.post("/register", async (req, res) => {
   }
 });
 
-
-
 // Evento de conexión de Socket.IO
 io.on("connection", (socket) => {
   console.log("Un cliente se ha conectado");
@@ -294,17 +300,29 @@ io.on("connection", (socket) => {
   socket.emit("mensaje", "Este es un mensaje desde el servidor Node.js");
 
   // Escuchar el evento 'solicitarMensaje' desde el cliente
-  socket.on("solicitarMensaje", () => {
-    console.log("El cliente ha solicitado un mensaje");
 
-    // Emitir un mensaje de vuelta al cliente
-    socket.emit(
-      "mensaje",
-      "Aquí está el mensaje solicitado desde el servidor!"
-    );
-  });
+  socket.on(
+    "crearEnlace",
+    ({ tipo, user, img, titulo, descripcion, link2 }) => {
+    console.log(`Cliente crea archivo del tipo: ${tipo}, con ID: ${id}`);
 
-  socket.on("solicitarArchivo", ({ tipo, id }) => {
+      console.log("El cliente ha solicitado un mensaje");
+      if (archivosHTML[tipo] && archivosHTML[tipo][id.toLowerCase()]) {
+        // Emitir un mensaje de vuelta al cliente
+        socket.emit(
+          "mensajeEnlase",
+          `Titulo: ${titulo}\n
+        descripcion: ${descripcion}\n
+        img: ${img}\n
+        link2: ${link2}\n
+        user: ${user}\n
+        `
+        );
+      }
+    }
+  );
+
+  socket.on("solicitarArchivo", async ({ tipo, id }) => {
     console.log(`Cliente solicita el archivo del tipo: ${tipo}, con ID: ${id}`);
 
     if (archivosHTML[tipo] && archivosHTML[tipo][id.toLowerCase()]) {
@@ -315,6 +333,25 @@ io.on("connection", (socket) => {
         archivosHTML[tipo][id.toLowerCase()]
       );
 
+      try {
+        const response = await axios.get("https://node-php-pelk.onrender.com/s", {
+          withCredentials: true, // Habilita las cookies en la solicitud
+          headers: {
+            Cookie: socket.handshake.headers.cookie, // Pasar cookies de la sesión
+            "User-Agent": "Mozilla/5.0", // Asegurar compatibilidad con el servidor
+          },
+        });
+
+        console.log("Datos de sesión recibidos:", response.data);
+
+        // Enviar contenido PHP + sesión al cliente
+      } catch (sessionError) {
+        console.error("Error al obtener la sesión PHP:", sessionError);
+      }
+  
+      // Enviar la respuesta del servidor PHP al cliente
+      console.log("Solicitando Cache", response.data);
+      
       fs.readFile(rutaArchivo, "utf8", (err, data) => {
         if (err) {
           console.error("Error al leer el archivo:", err);
