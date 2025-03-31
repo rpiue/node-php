@@ -17,6 +17,7 @@ const server = http.createServer(app);
 const io = socketIo(server); // Inicializamos Socket.IO
 // Middleware para servir archivos estáticos desde la carpeta "public"
 // Redirige "/dashboard" a "dashboard.php" y permite que Apache lo procese
+app.use(express.static("public"));
 
 app.use((req, res, next) => {
   console.log(`🛠️ Nueva petición: ${req.method} ${req.url}`);
@@ -33,7 +34,6 @@ app.use((req, res, next) => {
 });
 
 
-app.use(express.static("public"));
 
 app.use(
   "/login",
